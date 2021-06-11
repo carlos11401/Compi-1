@@ -1,0 +1,31 @@
+print("------- entero------")
+print("int + int = "+5+(4-2) + 10);
+print("int + double = "+5 + 4.5)
+print("int + boolT = "+5 + true)
+print("int + boolF = "+5 + false)
+print("int + char = "+5 + 'r')
+print("int + string = "+5 + "my string")
+print("-------- double ------------")
+print("double + int = "+ 3.4 + 10);
+print("double + double = "+5.1 + 4.5)
+print("double + boolT = "+5.1 + true)
+print("double + boolF = "+5.1 + false)
+print("double + char = "+5.13 + 'r')
+print("double + string = "+5.13 + "my sTring")
+print("-------- bool ------------")
+print("bool + int = "+ true + 10);
+print("bool + double = "+true + 4.5)
+print("bool + boolT = "+true + true)
+print("bool + boolF = "+true + false)
+print("bool + char = "+ false + 'r')
+print("bool + string = "+ false + "my string")
+print("-------- char ------------")
+print("char + char = "+ '\n' + 'v');
+print("char + string = "+ '\t' + "myString")
+print("-------- string ------------")
+print("str + int = "+ "myString " + 10);
+print("str + double = "+"myString " + 4.5)
+print("str + boolT = "+"myString " + true)
+print("str + boolF = "+"myString " + false)
+print("str + char = "+ "myString " + 'r')
+print("str + string = "+ "myString " + "other string")
