@@ -14,7 +14,7 @@ reservadas = {
 }
 tokens = [
      'IGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENIGUAL', 'MAYIGUAL', 'IGUALIGUAL',
-     'MAS', 'MENOS', 'MASMAS', 'MENOSMENOS', 'POR', 'DIV', 'MODULO', 'POT',
+     'MAS', 'MENOS', 'MASMAS', 'MENOSMENOS', 'POR', 'DIV', 'MOD', 'POT',
      'PTCOMA', 'DOSPUNTOS', 'COMA', 'COMILLASIMPLE', 'COMILLADOBLE',
      'DECIMAL', 'ENTERO', 'CADENA', 'BOOL', 'CHAR', 'ID',
      'PARA', 'PARC', 'CORA', 'CORC', 'LLAVEA', 'LLAVEC',
@@ -36,7 +36,7 @@ t_MASMAS = r'\+\+'
 t_MENOSMENOS = r'--'
 t_POR = r'\*'
 t_DIV = r'/'
-t_MODULO = r'%'
+t_MOD = r'%'
 t_POT = r'\*\*'
 t_PTCOMA = r';'
 t_DOSPUNTOS = r':'
@@ -126,7 +126,16 @@ def find_column(inp, token):
 import ply.lex as lex
 lexer = lex.lex()
 
-
+precedence = (
+    ('left','OR'),
+    ('left','AND'),
+    ('right','UNOT'),
+    ('left','MENOR','MAYOR', 'IGUALIGUAL', 'MENIGUAL','MAYIGUAL', 'DIFERENTE'),
+    ('left','MAS','MENOS'),
+    ('left','DIV','POR','MOD'),
+    ('left','POT'),
+    ('right','UMENOS'),
+    )
 
 # Definición de la gramática
 
@@ -134,7 +143,8 @@ lexer = lex.lex()
 from Abstract.instruccion import Instruccion
 from Instrucciones.Imprimir import Imprimir
 from Expresiones.Primitivos import Primitivos
-from TS.Tipo import OperadorAritmetico, TIPO
+from Expresiones.Logica import Logica
+from TS.Tipo import OperadorAritmetico,OperadorLogico, TIPO
 from Expresiones.Aritmetica import Aritmetica
 
 def p_init(t) :
@@ -173,6 +183,15 @@ def p_imprimir(t) :
     t[0] = Imprimir(t[3], t.lineno(1), find_column(input, t.slice[1]))
 
 #///////////////////////////////////////EXPRESION//////////////////////////////////////////////////
+def p_expresion_unaria(t):
+    '''
+    expresion : MENOS expresion %prec UMENOS 
+            | NOT expresion %prec UNOT 
+    '''
+    if t[1] == '-':
+        t[0] = Aritmetica(OperadorAritmetico.UMENOS, None,t[2], t.lineno(1), find_column(input, t.slice[1]))
+    elif t[1] == '!':
+        t[0] = Logica(OperadorLogico.NOT, t[2],None, t.lineno(1), find_column(input, t.slice[1]))
 
 def p_expresion_binaria(t):
     '''
@@ -181,7 +200,7 @@ def p_expresion_binaria(t):
             | expresion POR expresion
 			| expresion DIV expresion
 			| expresion POT expresion
-			| expresion MODULO expresion
+			| expresion MOD expresion
     '''
     if t[2] == '+':
         t[0] = Aritmetica(OperadorAritmetico.MAS, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))

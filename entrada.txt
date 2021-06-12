@@ -1,31 +1,32 @@
+print("------------------------------RESTA--------------------------")
 print("------- entero------")
-print("int + int = "+5+(4-2) + 10);
-print("int + double = "+5 + 4.5)
-print("int + boolT = "+5 + true)
-print("int + boolF = "+5 + false)
-print("int + char = "+5 + 'r')
-print("int + string = "+5 + "my string")
+print( 5 - (4-2) + 10+"cadena ");
+print( 5 - 4.5 + "int - double")
+print(5 - true + "int - boolT")
+print(5 - false + "int - boolF")
+print(5 - 'r' + "int - char = ")
+print(5 - "my string"+"int - string = ")
 print("-------- double ------------")
-print("double + int = "+ 3.4 + 10);
-print("double + double = "+5.1 + 4.5)
-print("double + boolT = "+5.1 + true)
-print("double + boolF = "+5.1 + false)
-print("double + char = "+5.13 + 'r')
-print("double + string = "+5.13 + "my sTring")
+print( 3.4 - 10+"double - int = ");
+print(5.1 - 4.5+"double - double = ")
+print(5.1 - true+"double - boolT = ")
+print(5.1 - false+"double - boolF = ")
+print(5.13 - 'r'+"double - char = ")
+print(5.13 - "my sTring"+"double - string = ")
 print("-------- bool ------------")
-print("bool + int = "+ true + 10);
-print("bool + double = "+true + 4.5)
-print("bool + boolT = "+true + true)
-print("bool + boolF = "+true + false)
-print("bool + char = "+ false + 'r')
-print("bool + string = "+ false + "my string")
+print(true - 10+"bool - int = ");
+print(true - 4.5+"bool - double = ")
+print(true - true+"bool - boolT = ")
+print(true - false+"bool - boolF = ")
+print(false - 'r'+"bool - char = ")
+print(false - "my string"+"bool - string = ")
 print("-------- char ------------")
-print("char + char = "+ '\n' + 'v');
-print("char + string = "+ '\t' + "myString")
+print('\n' - 'v'+"char - char = ");
+print("char - string = "+ '\t' - "myString")
 print("-------- string ------------")
-print("str + int = "+ "myString " + 10);
-print("str + double = "+"myString " + 4.5)
-print("str + boolT = "+"myString " + true)
-print("str + boolF = "+"myString " + false)
-print("str + char = "+ "myString " + 'r')
-print("str + string = "+ "myString " + "other string")
+print("myString " - 10+"str - int = ");
+print("myString " - 4.5 + "str - double = ")
+print("myString " - true + "str - boolT = ")
+print("myString " - false +"str - boolF = ")
+print("myString " - 'r' + "str - char = ")
+print("myString " - "other string" + "str - string = ")
