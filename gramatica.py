@@ -1,16 +1,17 @@
 '''
 gramatica de JPR
 '''
+from Expresiones.Relacional import Relacional
 from TS.Exception import Excepcion
 reservadas = {
-    'var': 'RVAR', 'int': 'RINT', 'double': 'RDOUBLE', 'boolean': 'RBOOL', 'char': 'RCHAR', 'string': 'RSTRING',
-    'null': 'RNULL',
+    'var': 'RVAR', 'int': 'RINT', 'double': 'RDOUBLE', 'boolean': 'RBOOL', 'char': 'RCHAR', 'string': 'RSTRING','null': 'RNULL',
     'main': 'RMAIN', 'read': 'RREAD', 'print': 'RPRINT', 'continue': 'RCONTINUE', 'return': 'RRETURN', 'new': 'RNEW',
     'lenght': 'RLENGHT', 'truncate': 'RTRUNCATE', 'round': 'RROUND', 'tipeof': 'RTIPEOF', 'func': 'RFUNC',
     'switch': 'RSWITCH', 'case': 'RCASE', 'default': 'RDEFAULT', 'break': 'RBREAK',
     'toLower': 'RTOLOWER', 'toUpper': 'RTOUPPER',
     'while': 'RWHILE', 'for': 'RFOR',
-    'if': 'RIF', 'else': 'RELSE'
+    'if': 'RIF', 'else': 'RELSE',
+    'true':'RTRUE','false':'RFALSE'
 }
 tokens = [
      'IGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENIGUAL', 'MAYIGUAL', 'IGUALIGUAL',
@@ -52,7 +53,6 @@ t_LLAVEC = r'\}'
 t_OR = r'\|\|'
 t_AND = r'&&'
 t_NOT = r'\!'
-
 # Comentario de múltiples líneas #* .. *#
 def t_COMENTARIOMULTI(t):
     r'\#\*(.|\n)*?\*\#'
@@ -144,7 +144,7 @@ from Abstract.instruccion import Instruccion
 from Instrucciones.Imprimir import Imprimir
 from Expresiones.Primitivos import Primitivos
 from Expresiones.Logica import Logica
-from TS.Tipo import OperadorAritmetico,OperadorLogico, TIPO
+from TS.Tipo import OperadorAritmetico,OperadorLogico,OperadorRelacional, TIPO
 from Expresiones.Aritmetica import Aritmetica
 
 def p_init(t) :
@@ -201,6 +201,12 @@ def p_expresion_binaria(t):
 			| expresion DIV expresion
 			| expresion POT expresion
 			| expresion MOD expresion
+            | expresion MENOR expresion
+			| expresion MAYOR expresion
+			| expresion MENIGUAL expresion
+            | expresion MAYIGUAL expresion
+			| expresion IGUALIGUAL expresion
+            | expresion DIFERENTE expresion
     '''
     if t[2] == '+':
         t[0] = Aritmetica(OperadorAritmetico.MAS, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))
@@ -214,7 +220,18 @@ def p_expresion_binaria(t):
         t[0] = Aritmetica(OperadorAritmetico.POT, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))
     elif t[2] == '%':
         t[0] = Aritmetica(OperadorAritmetico.MOD, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))
-
+    elif t[2] == '<':
+        t[0] = Relacional(OperadorRelacional.MENOR, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))
+    elif t[2] == '>':
+        t[0] = Relacional(OperadorRelacional.MAYOR, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))
+    elif t[2] == '<=':
+        t[0] = Relacional(OperadorRelacional.MENIGUAL, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))
+    elif t[2] == '>=':
+        t[0] = Relacional(OperadorRelacional.MAYIGUAL, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))
+    elif t[2] == '==':
+        t[0] = Relacional(OperadorRelacional.IGUALIGUAL, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))
+    elif t[2] == '=!':
+        t[0] = Relacional(OperadorRelacional.DIFERENTE, t[1],t[3], t.lineno(2), find_column(input, t.slice[2]))
 def p_expresion_agrupacion(t):
     'expresion : PARA expresion PARC'
     t[0] = t[2]
@@ -232,9 +249,12 @@ def p_expresion_cadena(t):
 def p_expresion_char(t):
     '''expresion : CHAR'''
     t[0] = Primitivos(TIPO.CHARACTER,t[1], t.lineno(1), find_column(input, t.slice[1]))
-def p_expresion_bool(t):
-    '''expresion : BOOL'''
-    t[0] = Primitivos(TIPO.BOOLEANO,t[1], t.lineno(1), find_column(input, t.slice[1]))
+def p_expresion_bool_true(t):
+    '''expresion : RTRUE'''
+    t[0] = Primitivos(TIPO.BOOLEANO,True, t.lineno(1), find_column(input, t.slice[1]))
+def p_expresion_bool_false(t):
+    '''expresion : RFALSE'''
+    t[0] = Primitivos(TIPO.BOOLEANO,False, t.lineno(1), find_column(input, t.slice[1]))
 # --------------- fin --------------
 def p_fin(t):
     '''
