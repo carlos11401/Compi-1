@@ -189,7 +189,7 @@ def p_expresion_unaria(t):
             | NOT expresion %prec UNOT 
     '''
     if t[1] == '-':
-        t[0] = Aritmetica(OperadorAritmetico.UMENOS, None,t[2], t.lineno(1), find_column(input, t.slice[1]))
+        t[0] = Aritmetica(OperadorAritmetico.UMENOS, t[2],None, t.lineno(1), find_column(input, t.slice[1]))
     elif t[1] == '!':
         t[0] = Logica(OperadorLogico.NOT, t[2],None, t.lineno(1), find_column(input, t.slice[1]))
 
