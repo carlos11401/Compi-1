@@ -141,6 +141,8 @@ precedence = (
 
 #Abstract
 from Instrucciones.Declaracion import Declaracion
+from Instrucciones.Incremento import Incremento
+from Instrucciones.Decremento import Decremento
 from Instrucciones.Asignacion import Asignacion
 from Instrucciones.Imprimir import Imprimir
 from Expresiones.Identificador import Identificador
@@ -173,7 +175,9 @@ def p_instrucciones_instruccion(t) :
 def p_instruccion(t) :
     '''instruccion      : print
                         | decla
-                        | asig'''
+                        | asig
+                        | incremento
+                        | decremento'''
     t[0] = t[1]
 
 def p_instruccion_error(t):
@@ -195,6 +199,12 @@ def p_declaracion2(t) :
 def p_asignacion(t) :
     'asig : ID IGUAL expresion fin'
     t[0] = Asignacion(t[1], t[3], t.lineno(1), find_column(input, t.slice[1]))
+def p_incremento(t) :
+    'incremento : ID MASMAS fin'
+    t[0] = Incremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
+def p_decremento(t) :
+    'decremento : ID MENOSMENOS fin'
+    t[0] = Decremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
 #///////////////////////////////////////EXPRESION//////////////////////////////////////////////////
 def p_expresion_unaria(t):
     '''
@@ -271,6 +281,10 @@ def p_expresion_bool_false(t):
 def p_expresion_identificador(t):
     '''expresion : ID'''
     t[0] = Identificador(t[1], t.lineno(1), find_column(input, t.slice[1]))
+def p_expresion_incremento_decremento(t):
+    '''expresion : incremento
+                 | decremento'''
+    t[0] = t[1]
 # --------------- fin --------------
 def p_fin(t):
     '''
