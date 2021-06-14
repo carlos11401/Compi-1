@@ -61,13 +61,7 @@ def t_COMENTARIOMULTI(t):
 def t_COMENTARIO(t):
     r'\#.*\n?'
     t.lexer.lineno += 1
-def t_BOOL(t):
-    r'(true|false)'
-    if t.value == "true":
-        t.value = True
-    elif t.value == "false":
-        t.value = False
-    return t
+
 def t_DECIMAL(t):
     r'\d+\.\d+'
     try:
@@ -272,6 +266,9 @@ def p_expresion_cadena(t):
 def p_expresion_char(t):
     '''expresion : CHAR'''
     t[0] = Primitivos(TIPO.CHARACTER,t[1], t.lineno(1), find_column(input, t.slice[1]))
+def p_expresion_nulo(t):
+    'expresion : RNULL'
+    t[0] = Primitivos(TIPO.NULO,t[1], t.lineno(1), find_column(input, t.slice[1]))
 def p_expresion_bool_true(t):
     '''expresion : RTRUE'''
     t[0] = Primitivos(TIPO.BOOLEANO,True, t.lineno(1), find_column(input, t.slice[1]))

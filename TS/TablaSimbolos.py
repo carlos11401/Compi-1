@@ -15,11 +15,13 @@ class TablaSimbolos:
 
     def getTabla(self, id):            # obtener una variable
         tablaActual = self
-        while tablaActual != None:
-            if id in self.tabla :
-                return self.tabla[id]
+        while tablaActual.tabla != None:
+            if id in tablaActual.tabla:
+                return tablaActual.tabla[id]
             else:
                 tablaActual = tablaActual.anterior
+                if tablaActual == None:
+                    return None
         return None
 
     def actualizarTabla(self, simbolo):
