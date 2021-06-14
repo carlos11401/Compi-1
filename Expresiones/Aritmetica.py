@@ -4,21 +4,22 @@ from TS.Tipo import TIPO, OperadorAritmetico
 
 
 class Aritmetica(Instruccion):
-    def __init__(self, operador, OperacionIzq, OperacionDer, fila, columna):
+    def __init__(self, operador, operacionIzq, operacionDer, fila, columna):
         self.operador = operador
-        self.OperacionIzq = OperacionIzq
-        self.OperacionDer = OperacionDer
+        self.OperacionIzq = operacionIzq
+        self.OperacionDer = operacionDer
         self.fila = fila
         self.columna = columna
         self.tipo = None
 
     def interpretar(self, tree, table):
         izq = self.OperacionIzq.interpretar(tree, table)
-        if isinstance(izq, Excepcion): return izq
-        if self.OperacionDer != None:
+        if isinstance(izq, Excepcion):
+            return izq
+        if self.OperacionDer is not None:
             der = self.OperacionDer.interpretar(tree, table)
-            if isinstance(der, Excepcion): return der
-
+            if isinstance(der, Excepcion):
+                return der
         if self.operador == OperadorAritmetico.MAS:  # -------------------------- SUMA
             # ---------- entero
             if self.OperacionIzq.tipo == TIPO.ENTERO and self.OperacionDer.tipo == TIPO.ENTERO:
@@ -178,7 +179,7 @@ class Aritmetica(Instruccion):
                 self.tipo = TIPO.DECIMAL
                 return self.obtenerVal(self.OperacionIzq.tipo, izq) % self.obtenerVal(self.OperacionDer.tipo, der)
             return Excepcion("Semantico", "Tipo Erroneo de operacion para (%).", self.fila, self.columna)
-        elif self.operador == OperadorAritmetico.UMENOS: # ------------- NEGACION UNARIA
+        elif self.operador == OperadorAritmetico.UMENOS:  # ------------- NEGACION UNARIA
             if self.OperacionIzq.tipo == TIPO.ENTERO:
                 self.tipo = TIPO.ENTERO
                 return - self.obtenerVal(self.OperacionIzq.tipo, izq)
@@ -186,6 +187,7 @@ class Aritmetica(Instruccion):
                 self.tipo = TIPO.DECIMAL
                 return - self.obtenerVal(self.OperacionIzq.tipo, izq)
             return Excepcion("Semantico", "Tipo Erroneo de operacion para - unario.", self.fila, self.columna)
+
     def obtenerVal(self, tipo, val):
         if tipo == TIPO.ENTERO:
             return int(val)

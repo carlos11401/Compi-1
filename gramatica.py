@@ -139,6 +139,7 @@ from Instrucciones.Incremento import Incremento
 from Instrucciones.Decremento import Decremento
 from Instrucciones.Asignacion import Asignacion
 from Instrucciones.Imprimir import Imprimir
+from Instrucciones.If import If
 from Expresiones.Identificador import Identificador
 from Expresiones.Primitivos import Primitivos
 from Expresiones.Aritmetica import Aritmetica
@@ -171,7 +172,8 @@ def p_instruccion(t) :
                         | decla
                         | asig
                         | incremento
-                        | decremento'''
+                        | decremento
+                        | sentIf'''
     t[0] = t[1]
 
 def p_instruccion_error(t):
@@ -183,7 +185,7 @@ def p_instruccion_error(t):
 def p_imprimir(t) :
     'print     : RPRINT PARA expresion PARC fin'
     t[0] = Imprimir(t[3], t.lineno(1), find_column(input, t.slice[1]))
-
+# --------- DECLA AND ASIG
 def p_declaracion1(t) :
     'decla : RVAR ID fin'
     t[0] = Declaracion(t[2], t.lineno(2), find_column(input, t.slice[2]))
@@ -193,16 +195,28 @@ def p_declaracion2(t) :
 def p_asignacion(t) :
     'asig : ID IGUAL expresion fin'
     t[0] = Asignacion(t[1], t[3], t.lineno(1), find_column(input, t.slice[1]))
+# ------------(++) and (--)
 def p_incremento(t) :
     'incremento : ID MASMAS fin'
     t[0] = Incremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
 def p_decremento(t) :
     'decremento : ID MENOSMENOS fin'
     t[0] = Decremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
+# --------------- IF
+def p_if1(t) :
+    'sentIf : RIF PARA expresion PARC LLAVEA instrucciones LLAVEC'
+    t[0] = If(t[3], t[6], None, None, t.lineno(1), find_column(input, t.slice[1]))
+
+def p_if2(t) :
+    'sentIf : RIF PARA expresion PARC LLAVEA instrucciones LLAVEC RELSE LLAVEA instrucciones LLAVEC'
+    t[0] = If(t[3], t[6], t[10], None, t.lineno(1), find_column(input, t.slice[1]))
+
+def p_if3(t) :
+    'sentIf : RIF PARA expresion PARC LLAVEA instrucciones LLAVEC RELSE sentIf'
+    t[0] = If(t[3], t[6], None, t[9], t.lineno(1), find_column(input, t.slice[1]))
 #///////////////////////////////////////EXPRESION//////////////////////////////////////////////////
 def p_expresion_unaria(t):
-    '''
-    expresion : MENOS expresion %prec UMENOS 
+    '''expresion : MENOS expresion %prec UMENOS
             | NOT expresion %prec UNOT 
     '''
     if t[1] == '-':
