@@ -1,7 +1,5 @@
-print("------------------------------MULTI--------------------------")
-var a;
-print(a)
-a = 6
-print(a)
-var b = "hola"
-print(b+a)
+var a
+a = 5
+PRINT(a++)
+var b = 5.5
+print(a++ - b--)
