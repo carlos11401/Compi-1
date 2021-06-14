@@ -140,12 +140,14 @@ precedence = (
 # Definición de la gramática
 
 #Abstract
-from Abstract.instruccion import Instruccion
+from Instrucciones.Declaracion import Declaracion
+from Instrucciones.Asignacion import Asignacion
 from Instrucciones.Imprimir import Imprimir
+from Expresiones.Identificador import Identificador
 from Expresiones.Primitivos import Primitivos
+from Expresiones.Aritmetica import Aritmetica
 from Expresiones.Logica import Logica
 from TS.Tipo import OperadorAritmetico,OperadorLogico,OperadorRelacional, TIPO
-from Expresiones.Aritmetica import Aritmetica
 
 def p_init(t) :
     'init            : instrucciones'
@@ -169,19 +171,30 @@ def p_instrucciones_instruccion(t) :
 #///////////////////////////////////////INSTRUCCION//////////////////////////////////////////////////
 
 def p_instruccion(t) :
-    '''instruccion      : print'''
+    '''instruccion      : print
+                        | decla
+                        | asig'''
     t[0] = t[1]
 
 def p_instruccion_error(t):
     'instruccion        : error PTCOMA'
     errores.append(Excepcion("Sintáctico","Error Sintáctico." + str(t[1].value) , t.lineno(1), find_column(input, t.slice[1])))
     t[0] = ""
-#///////////////////////////////////////IMPRIMIR//////////////////////////////////////////////////
+#///////////////////////////////////////INSTRUCCIONES//////////////////////////////////////////////////
 
 def p_imprimir(t) :
     'print     : RPRINT PARA expresion PARC fin'
     t[0] = Imprimir(t[3], t.lineno(1), find_column(input, t.slice[1]))
 
+def p_declaracion1(t) :
+    'decla : RVAR ID fin'
+    t[0] = Declaracion(t[2], t.lineno(2), find_column(input, t.slice[2]))
+def p_declaracion2(t) :
+    'decla : RVAR ID IGUAL expresion fin'
+    t[0] = Declaracion(t[2], t.lineno(2), find_column(input, t.slice[2]), t[4])
+def p_asignacion(t) :
+    'asig : ID IGUAL expresion fin'
+    t[0] = Asignacion(t[1], t[3], t.lineno(1), find_column(input, t.slice[1]))
 #///////////////////////////////////////EXPRESION//////////////////////////////////////////////////
 def p_expresion_unaria(t):
     '''
@@ -255,6 +268,9 @@ def p_expresion_bool_true(t):
 def p_expresion_bool_false(t):
     '''expresion : RFALSE'''
     t[0] = Primitivos(TIPO.BOOLEANO,False, t.lineno(1), find_column(input, t.slice[1]))
+def p_expresion_identificador(t):
+    '''expresion : ID'''
+    t[0] = Identificador(t[1], t.lineno(1), find_column(input, t.slice[1]))
 # --------------- fin --------------
 def p_fin(t):
     '''
