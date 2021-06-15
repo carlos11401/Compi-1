@@ -1,8 +1,5 @@
-var a =5
-print(a)
-if(a==5){
-    print("in if")
-    var a = 10
-    print(a++)
+var i = 0
+for(i = 0 ; i<4 ; i=i+1){
+    print(i)
 }
-print(a)
+print("var = "+i)
