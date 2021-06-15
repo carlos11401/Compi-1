@@ -1,5 +1,11 @@
-var i = 0
-for(i = 0 ; i<4 ; i=i+1){
-    print(i)
+var c = 9
+switch(c){
+    case 5:
+        print("hola soy 5")
+    case 6:
+        print("hola soy 6")
+    case 7:
+        print("hola soy 7")
+    case 8:
+        print("hola soy 8")
 }
-print("var = "+i)

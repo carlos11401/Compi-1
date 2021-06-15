@@ -161,8 +161,10 @@ from Instrucciones.Incremento import Incremento
 from Instrucciones.Decremento import Decremento
 from Instrucciones.Asignacion import Asignacion
 from Instrucciones.Imprimir import Imprimir
+from Instrucciones.Switch import Switch
 from Instrucciones.While import While
 from Instrucciones.Break import Break
+from Instrucciones.Case import Case
 from Instrucciones.For import For
 from Instrucciones.If import If
 from Expresiones.Identificador import Identificador
@@ -176,26 +178,19 @@ def p_init(t):
     'init            : instrucciones'
     t[0] = t[1]
 
-
 def p_instrucciones_instrucciones_instruccion(t):
     'instrucciones    : instrucciones instruccion'
     if t[2] != "":
         t[1].append(t[2])
     t[0] = t[1]
-
-
 # ///////////////////////////////////////INSTRUCCIONES//////////////////////////////////////////////////
-
 def p_instrucciones_instruccion(t):
     'instrucciones    : instruccion'
     if t[1] == "":
         t[0] = []
     else:
         t[0] = [t[1]]
-
-
 # ///////////////////////////////////////INSTRUCCION//////////////////////////////////////////////////
-
 def p_instruccion(t):
     '''instruccion      : print
                         | decla
@@ -205,78 +200,53 @@ def p_instruccion(t):
                         | sentIf
                         | sentWhile
                         | sentBreak
-                        | sentFor'''
+                        | sentFor
+                        | sentSwitch'''
     t[0] = t[1]
-
-
 def p_instruccion_error(t):
     'instruccion        : error PTCOMA'
     errores.append(
         Excepcion("Sintáctico", "Error Sintáctico." + str(t[1].value), t.lineno(1), find_column(input, t.slice[1])))
     t[0] = ""
-
-
 # ///////////////////////////////////////INSTRUCCIONES//////////////////////////////////////////////////
-
 def p_imprimir(t):
     'print     : RPRINT PARA expresion PARC fin'
     t[0] = Imprimir(t[3], t.lineno(1), find_column(input, t.slice[1]))
-
-
 # --------- DECLA AND ASIG
 def p_declaracion1(t):
     'decla : RVAR ID fin'
     t[0] = Declaracion(t[2], t.lineno(2), find_column(input, t.slice[2]))
-
-
 def p_declaracion2(t):
     'decla : RVAR ID IGUAL expresion fin'
     t[0] = Declaracion(t[2], t.lineno(2), find_column(input, t.slice[2]), t[4])
-
-
 def p_asignacion(t):
     'asig : ID IGUAL expresion fin'
     t[0] = Asignacion(t[1], t[3], t.lineno(1), find_column(input, t.slice[1]))
-
-
 # ------------(++) and (--)
 def p_incremento(t):
     'incremento : ID MASMAS fin'
     t[0] = Incremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_decremento(t):
     'decremento : ID MENOSMENOS fin'
     t[0] = Decremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
-
-
 # --------------- IF
 def p_if1(t):
     'sentIf : RIF PARA expresion PARC LLAVEA instrucciones LLAVEC'
     t[0] = If(t[3], t[6], None, None, t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_if2(t):
     'sentIf : RIF PARA expresion PARC LLAVEA instrucciones LLAVEC RELSE LLAVEA instrucciones LLAVEC'
     t[0] = If(t[3], t[6], t[10], None, t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_if3(t):
     'sentIf : RIF PARA expresion PARC LLAVEA instrucciones LLAVEC RELSE sentIf'
     t[0] = If(t[3], t[6], None, t[9], t.lineno(1), find_column(input, t.slice[1]))
-
-
 # ------------------ WHILE
 def p_while(t):
     'sentWhile     : RWHILE PARA expresion PARC LLAVEA instrucciones LLAVEC'
     t[0] = While(t[3], t[6], t.lineno(1), find_column(input, t.slice[1]))
-
 # ------------------ BREAK
 def p_break(t):
     'sentBreak     : RBREAK fin'
     t[0] = Break(t.lineno(1), find_column(input, t.slice[1]))
-
-
 # ----------------- FOR
 def p_for(t):
     '''
@@ -298,6 +268,24 @@ def p_actualizacion_incremento(t):
 def p_actualizacion_decremento(t):
     'actualizacion : ID MENOSMENOS'
     t[0] = Decremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
+# --------------- SWITCH
+def p_switch(t):
+    'sentSwitch : RSWITCH PARA expresion PARC LLAVEA cases LLAVEC'
+    t[0] = Switch(t[3],t[6],t.lineno(1), find_column(input, t.slice[1]))
+def p_cases_cases_case(t):
+    'cases : cases case'
+    if t[2] != "":
+        t[1].append(t[2])
+    t[0] = t[1]
+def p_cases_case(t):
+    'cases    : case'
+    if t[1] == "":
+        t[0] = []
+    else:
+        t[0] = [t[1]]
+def p_case(t):
+    'case : RCASE expresion DOSPUNTOS instrucciones'
+    t[0] = Case(t[2],t[4],t.lineno(1), find_column(input, t.slice[1]))
 # ///////////////////////////////////////EXPRESION//////////////////////////////////////////////////
 def p_expresion_unaria(t):
     '''expresion : MENOS expresion %prec UMENOS
@@ -307,8 +295,6 @@ def p_expresion_unaria(t):
         t[0] = Aritmetica(OperadorAritmetico.UMENOS, t[2], None, t.lineno(1), find_column(input, t.slice[1]))
     elif t[1] == '!':
         t[0] = Logica(OperadorLogico.NOT, t[2], None, t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_expresion_binaria(t):
     '''
     expresion : expresion MAS expresion
@@ -348,59 +334,37 @@ def p_expresion_binaria(t):
         t[0] = Relacional(OperadorRelacional.IGUALIGUAL, t[1], t[3], t.lineno(2), find_column(input, t.slice[2]))
     elif t[2] == '=!':
         t[0] = Relacional(OperadorRelacional.DIFERENTE, t[1], t[3], t.lineno(2), find_column(input, t.slice[2]))
-
-
 def p_expresion_agrupacion(t):
     'expresion : PARA expresion PARC'
     t[0] = t[2]
-
-
 def p_expresion_entero(t):
     '''expresion : ENTERO'''
     t[0] = Primitivos(TIPO.ENTERO, t[1], t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_expresion_decimal(t):
     '''expresion : DECIMAL'''
     t[0] = Primitivos(TIPO.DECIMAL, t[1], t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_expresion_cadena(t):
     '''expresion : CADENA'''
     t[0] = Primitivos(TIPO.CADENA, t[1], t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_expresion_char(t):
     '''expresion : CHAR'''
     t[0] = Primitivos(TIPO.CHARACTER, t[1], t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_expresion_nulo(t):
     'expresion : RNULL'
     t[0] = Primitivos(TIPO.NULO, t[1], t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_expresion_bool_true(t):
     '''expresion : RTRUE'''
     t[0] = Primitivos(TIPO.BOOLEANO, True, t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_expresion_bool_false(t):
     '''expresion : RFALSE'''
     t[0] = Primitivos(TIPO.BOOLEANO, False, t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_expresion_identificador(t):
     '''expresion : ID'''
     t[0] = Identificador(t[1], t.lineno(1), find_column(input, t.slice[1]))
-
-
 def p_expresion_incremento_decremento(t):
     '''expresion : incremento
                  | decremento'''
     t[0] = t[1]
-
-
 # --------------- fin --------------
 def p_fin(t):
     '''
