@@ -1,11 +1,14 @@
-var c = 9
+var c = 5
 switch(c){
     case 5:
         print("hola soy 5")
+        break
     case 6:
         print("hola soy 6")
     case 7:
         print("hola soy 7")
-    case 8:
+    case 5:
         print("hola soy 8")
+    default:
+        print("no cumple")
 }

@@ -269,9 +269,15 @@ def p_actualizacion_decremento(t):
     'actualizacion : ID MENOSMENOS'
     t[0] = Decremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
 # --------------- SWITCH
-def p_switch(t):
+def p_switch_cases_default(t):
+    'sentSwitch : RSWITCH PARA expresion PARC LLAVEA cases default LLAVEC'
+    t[0] = Switch(t[3],t[6],t[7],t.lineno(1), find_column(input, t.slice[1]))
+def p_switch_cases(t):
     'sentSwitch : RSWITCH PARA expresion PARC LLAVEA cases LLAVEC'
-    t[0] = Switch(t[3],t[6],t.lineno(1), find_column(input, t.slice[1]))
+    t[0] = Switch(t[3],t[6],None,t.lineno(1), find_column(input, t.slice[1]))
+def p_switch_default(t):
+    'sentSwitch : RSWITCH PARA expresion PARC LLAVEA default LLAVEC'
+    t[0] = Switch(t[3],None,t[6],t.lineno(1), find_column(input, t.slice[1]))
 def p_cases_cases_case(t):
     'cases : cases case'
     if t[2] != "":
@@ -286,6 +292,9 @@ def p_cases_case(t):
 def p_case(t):
     'case : RCASE expresion DOSPUNTOS instrucciones'
     t[0] = Case(t[2],t[4],t.lineno(1), find_column(input, t.slice[1]))
+def p_default(t):
+    'default : RDEFAULT DOSPUNTOS instrucciones'
+    t[0] = t[3]
 # ///////////////////////////////////////EXPRESION//////////////////////////////////////////////////
 def p_expresion_unaria(t):
     '''expresion : MENOS expresion %prec UMENOS

@@ -26,7 +26,8 @@ class If(Instruccion):
                     if isinstance(result, Excepcion):
                         tree.getExcepciones().append(result)
                         tree.updateConsola(result.toString())
-                    if isinstance(result, Break): return result
+                    if isinstance(result, Break):
+                        return result
             else:  # ELSE
                 if self.instruccionesElse is not None:
                     nuevaTabla = TablaSimbolos(table)  # NUEVO ENTORNO
