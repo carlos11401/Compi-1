@@ -14,7 +14,7 @@ class Switch(Instruccion):
 
     def interpretar(self, tree, table):
         condicion1 = self.condicion.interpretar(tree, table)
-        foundCase = False
+        brakeFound = False
         if isinstance(condicion1, Excepcion): return condicion1
         if self.cases is not None:
             for case in self.cases:
@@ -26,16 +26,17 @@ class Switch(Instruccion):
                 if isinstance(condicion2, Break): return condicion2
                 # prove which case choose
                 if condicion1 == condicion2:
-                    foundCase = True
                     for instruccion in instrucciones:
                         result = instruccion.interpretar(tree, nuevaTabla)  # EJECUTA INSTRUCCION ADENTRO DEL IF
                         if isinstance(result, Excepcion):
                             tree.getExcepciones().append(result)
                             tree.updateConsola(result.toString())
                         # to accept BRAKE and not how error
-                        if isinstance(result, Break) : return None
+                        if isinstance(result, Break) :
+                            brakeFound = True
+                            return None
         # if there's default
-        if not foundCase and (self.default is not None):
+        if not brakeFound and (self.default is not None):
             nuevaTabla = TablaSimbolos(table)
             for instruccion in self.default:
                 result = instruccion.interpretar(tree, nuevaTabla)  # EJECUTA INSTRUCCION ADENTRO DEL IF

@@ -164,6 +164,7 @@ from Instrucciones.Imprimir import Imprimir
 from Instrucciones.Switch import Switch
 from Instrucciones.While import While
 from Instrucciones.Break import Break
+from Instrucciones.Main import Main
 from Instrucciones.Case import Case
 from Instrucciones.For import For
 from Instrucciones.If import If
@@ -201,7 +202,8 @@ def p_instruccion(t):
                         | sentWhile
                         | sentBreak
                         | sentFor
-                        | sentSwitch'''
+                        | sentSwitch
+                        | main'''
     t[0] = t[1]
 def p_instruccion_error(t):
     'instruccion        : error PTCOMA'
@@ -295,6 +297,9 @@ def p_case(t):
 def p_default(t):
     'default : RDEFAULT DOSPUNTOS instrucciones'
     t[0] = t[3]
+def p_main(t) :
+    'main     : RMAIN PARA PARC LLAVEA instrucciones LLAVEC'
+    t[0] = Main(t[5], t.lineno(1), find_column(input, t.slice[1]))
 # ///////////////////////////////////////EXPRESION//////////////////////////////////////////////////
 def p_expresion_unaria(t):
     '''expresion : MENOS expresion %prec UMENOS
@@ -318,6 +323,8 @@ def p_expresion_binaria(t):
             | expresion MAYIGUAL expresion
 			| expresion IGUALIGUAL expresion
             | expresion DIFERENTE expresion
+            | expresion OR expresion
+			| expresion AND expresion
     '''
     if t[2] == '+':
         t[0] = Aritmetica(OperadorAritmetico.MAS, t[1], t[3], t.lineno(2), find_column(input, t.slice[2]))
@@ -343,6 +350,10 @@ def p_expresion_binaria(t):
         t[0] = Relacional(OperadorRelacional.IGUALIGUAL, t[1], t[3], t.lineno(2), find_column(input, t.slice[2]))
     elif t[2] == '=!':
         t[0] = Relacional(OperadorRelacional.DIFERENTE, t[1], t[3], t.lineno(2), find_column(input, t.slice[2]))
+    elif t[2] == '||':
+        t[0] = Logica(OperadorLogico.OR, t[1], t[3], t.lineno(2), find_column(input, t.slice[2]))
+    elif t[2] == '&&':
+        t[0] = Logica(OperadorLogico.AND, t[1], t[3], t.lineno(2), find_column(input, t.slice[2]))
 def p_expresion_agrupacion(t):
     'expresion : PARA expresion PARC'
     t[0] = t[2]
@@ -421,14 +432,40 @@ for error in errores:  # CAPTURA DE ERRORES LEXICOS Y SINTACTICOS
     ast.getExcepciones().append(error)
     ast.updateConsola(error.toString())
 
-for instruccion in ast.getInstrucciones():  # REALIZAR LAS ACCIONES
-    value = instruccion.interpretar(ast, TSGlobal)
-    if isinstance(value, Excepcion):
-        ast.getExcepciones().append(value)
-        ast.updateConsola(value.toString())
-    if isinstance(value, Break):
-        err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila, instruccion.columna)
+for instruccion in ast.getInstrucciones():  # 1ERA PASADA (DECLARACIONES Y ASIGNACIONES)
+    if isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
+        value = instruccion.interpretar(ast, TSGlobal)
+        if isinstance(value, Excepcion):
+            ast.getExcepciones().append(value)
+            ast.updateConsola(value.toString())
+        if isinstance(value, Break):
+            err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila, instruccion.columna)
+            ast.getExcepciones().append(err)
+            ast.updateConsola(err.toString())
+
+for instruccion in ast.getInstrucciones():  # 2DA PASADA (MAIN)
+    contador = 0
+    if isinstance(instruccion, Main):
+        contador += 1
+        if contador == 2:  # VERIFICAR LA DUPLICIDAD
+            err = Excepcion("Semantico", "Existen 2 funciones Main", instruccion.fila, instruccion.columna)
+            ast.getExcepciones().append(err)
+            ast.updateConsola(err.toString())
+            break
+        value = instruccion.interpretar(ast, TSGlobal)
+        if isinstance(value, Excepcion):
+            ast.getExcepciones().append(value)
+            ast.updateConsola(value.toString())
+        if isinstance(value, Break):
+            err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila, instruccion.columna)
+            ast.getExcepciones().append(err)
+            ast.updateConsola(err.toString())
+
+for instruccion in ast.getInstrucciones():  # 3ERA PASADA (SENTENCIAS FUERA DE MAIN)
+    if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion)):
+        err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
         ast.getExcepciones().append(err)
         ast.updateConsola(err.toString())
 
 print(ast.getConsola())
+

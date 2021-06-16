@@ -29,8 +29,9 @@ class For(Instruccion):
                             tree.getExcepciones().append(result)
                             tree.updateConsola(result.toString())
                         if isinstance(result, Break): return None
-                        self.actualizacion.interpretar(tree,newTableInstr)
                 else:
                     break
             else:
                 return Excepcion("Semantico", "Tipo de dato no booleano en While.", self.fila, self.columna)
+            actualizacion = self.actualizacion.interpretar(tree, newTableInstr)
+            if isinstance(actualizacion, Excepcion): return actualizacion
