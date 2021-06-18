@@ -1,7 +1,9 @@
 from os import terminal_size
 from tkinter import *
 from tkinter import filedialog, messagebox, ttk
+import gramatica as Grammar
 import tkinter.scrolledtext as st
+
 def lineas(*args):      #ACTUALIZAR LINEAS
     lines.delete("all")
 
@@ -14,7 +16,142 @@ def lineas(*args):      #ACTUALIZAR LINEAS
         strline = str(cont).split(".")[0]
         lines.create_text(2,y,anchor="nw", text=strline, font = ("Arial", 10))
         cont = editor.index("%s+1line" % cont)
+def recorrerInput(entrada):  #Funcion para obtener palabrvas reservadas, signos, numeros, etc
+    lista = []
+    val = ''
+    counter = 0
+    while counter < len(entrada):
+        # ID and signs
+        if val != '' and re.search(r"[a-zA-Z0-9]|_", entrada[counter]):
+            val += entrada[counter]
+        elif re.search(r"[a-zA-Z]", entrada[counter]):
+            val += entrada[counter]
+        # recognize COMMENTS
+        elif entrada[counter] == "#":
+            if len(val) != 0:
+                l = []
+                l.append("other")
+                l.append(val)
+                lista.append(l)
+                val = ''
+            val = entrada[counter]
+            counter += 1
+            while counter < len(entrada):
+                # MULTI LINE COMMENTS
+                if entrada[counter] == "*":
+                    val += entrada[counter]
+                    counter += 1
+                    while counter < len(entrada):
+                        if entrada[counter] == "*":
+                            if counter+1 < len(entrada):
+                                val += entrada[counter]
+                                counter += 1
+                                if entrada[counter] == "#":
+                                    val += entrada[counter]
+                                    l = []
+                                    l.append("comment")
+                                    l.append(val)
+                                    lista.append(l)
+                                    val = ''
+                                    break
+                            val += entrada[counter]
+                        val += entrada[counter]
+                        counter += 1
+                    break
+                # LINE COMMENT
+                else:
+                    val += entrada[counter]
+                    counter += 1
+                    while counter < len(entrada):
+                        if entrada[counter] == '\n':
+                            val += entrada[counter]
+                            l = []
+                            l.append("comment")
+                            l.append(val)
+                            lista.append(l)
+                            val = ''
+                            break
+                        val += entrada[counter]
+                        counter += 1
+                    break
+                val += entrada[counter]
+                counter += 1
+        # recognize CHAINS
+        elif entrada[counter] == "\"":
+            if len(val) != 0:
+                l = []
+                l.append("other")
+                l.append(val)
+                lista.append(l)
+                val = ''
+            val = entrada[counter]
+            counter += 1
+            while counter < len(entrada):
+                if entrada[counter] == "\"":
+                    val += entrada[counter]
+                    l = []
+                    l.append("string")
+                    l.append(val)
+                    lista.append(l)
+                    val = ''
+                    break
+                val += entrada[counter]
+                counter += 1
+        # recognize CHARS
+        elif entrada[counter] == "\'":
+            if len(val) != 0:
+                l = []
+                l.append("other")
+                l.append(val)
+                lista.append(l)
+                val = ''
+            val = entrada[counter]
+            counter += 1
+            while counter < len(entrada):
+                if entrada[counter] == "\'":
+                    val += entrada[counter]
+                    l = []
+                    l.append("string")
+                    l.append(val)
+                    lista.append(l)
+                    val = ''
+                    break
+                val += entrada[counter]
+                counter += 1
+        else:
+            if len(val) != 0:
+                try:
+                    num = int(val)
+                    l = []
+                    l.append("numero")
+                    l.append(num)
+                    lista.append(l)
+                    val = ''
+                except:
+                    l = []
+                    l.append("other")
+                    l.append(val)
+                    lista.append(l)
+                    val = ''
+            try:
+                num = int(entrada[counter])
+                l = []
+                l.append("numero")
+                l.append(num)
+                lista.append(l)
+            except:
+                l = []
+                l.append("other")
+                l.append(entrada[counter])
+                lista.append(l)
+        counter +=1
+    for s in lista:
+        # search reserved words in DICTIONARY of reserved
+        for key in Grammar.reservadas:
+            if type(s[1]) is str and key == s[1].lower():
+                s[0] = 'reservada'
 
+    return lista
 def posicion(event):    #ACTUALIZAR POSICION
     pos.config(text = "[" + str(editor.index(INSERT)).replace(".",",") + "]" )
 # Creating tkinter window -----------------------
@@ -25,17 +162,21 @@ root.geometry("1050x500")
 
 # functions for file ------------------------------
 file = ""   # path from file in memory
+contentFile = ""
 def openFile():
     global file
+    global contentFile
     # get name file
     file = filedialog.askopenfilename(title="open")
     extension = file[len(file)-3:len(file)]
     if extension == "jpr":
         # open file
         fileOpen = open(file)
-        content = fileOpen.read()
-        editor.delete("1.0", "end")    # delete text in text area
-        editor.insert(INSERT, content)
+        contentFile = fileOpen.read()
+        editor.delete(1.0, "end")    # delete text in text area
+        # to print colors of words
+        for s in recorrerInput(contentFile):
+            editor.insert(INSERT, s[1], s[0])
         fileOpen.close()
     else:
         messagebox.showinfo("ERROR open file", "File isn't type .jpr")
@@ -58,11 +199,25 @@ def saveAs():
     save_file.write(editor.get(1.0, END))
     save_file.close()
     file = save
+'''aux = ""
+def onChange(event):  #Funcion para obtener palabrvas reservadas, signos, numeros, etc
+    global aux
+    if event.char == " ":
+        aux = editor.get(1.0, "end")
+        #aux = aux.replace('\n',' ')
+        print(aux)
+        editor.delete(1.0, "end")
+        for s in recorrerInput(aux):
+            editor.insert(INSERT, s[1], s[0])'''
 
+def initGrammar():
+    console.delete(1.0, "end")
+    contentFile = editor.get(1.0, "end")
+    console.insert(INSERT, Grammar.generateCode(contentFile))
 def initComponents():
     # create bar and menu ---------------------------------------
     barMenu = Menu(root)
-    mnuFile = Menu(barMenu)  # create menus
+    mnuFile = Menu(barMenu)
     # create commands of menus
     mnuFile.add_command(label="Open", command=openFile)
     mnuFile.add_command(label="New", command=newFile)
@@ -70,11 +225,18 @@ def initComponents():
     mnuFile.add_command(label="Save as", command=saveAs)
     # add menus at the bar menu
     barMenu.add_cascade(label="File", menu=mnuFile)
+
+    # create options ------------------------------------------
+    mnuOptions = Menu(barMenu)
+    # create commands of menus
+    mnuOptions.add_command(label="Start", command=initGrammar)
+    mnuOptions.add_command(label="Report Errors", command=Grammar.reportErrors)
+    # add menus at the bar menu
+    barMenu.add_cascade(label="Options", menu=mnuOptions)
     # indicate that bar menu will be in the window
     root.config(menu=barMenu)
-
     root.mainloop()
-#ELEMENTOS
+#ELEMENTOS --------------------------------------------------------------
 frame = Frame(root, bg="gray60")
 canvas = Canvas(frame)
 scrollbar = Scrollbar(frame, orient=VERTICAL, command=canvas.yview)
@@ -92,16 +254,19 @@ canvas.configure(xscrollcommand=scrollbar2.set, yscrollcommand=scrollbar.set, wi
 
 pos = ttk.Label(scrollable_frame)
 pos.grid(column = 1, row = 1)
-editor = st.ScrolledText(scrollable_frame, undo = True, width = 60, height = 15)
-lines = Canvas(scrollable_frame, width = 30, height = 240, background = 'gray60')
-console = st.ScrolledText(scrollable_frame, undo = True, width = 60, height = 15)
+editor = st.ScrolledText(scrollable_frame, undo = True, width = 60, height = 20, wrap='none')
+lines = Canvas(scrollable_frame, width = 30, height = 320, background = 'gray60')
+console = st.ScrolledText(scrollable_frame, undo = True, width = 60, height = 20, wrap='none')
 btnNext = Button(scrollable_frame, width = 10, height = 1, text="Next")
 # CAMBIO DE COLORES
-editor.tag_config('reservada', foreground='red')
-editor.tag_config('variable', foreground='maroon4')
-editor.tag_config('string', foreground='green2')
+editor.tag_config('reservada', foreground='blue')
+editor.tag_config('string', foreground='orange')
+editor.tag_config('numero', foreground='purple')
+editor.tag_config('comment', foreground='gray')
+editor.tag_config('other', foreground='black')
+
 editor.tag_config('operacion', foreground='gold')
-editor.tag_config('etiqueta', foreground='purple')
+#editor.tag_config('signo', foreground='gray')
 # set position to widgets
 pos.grid(column = 1, row = 1)
 btnNext.grid(column = 2, row = 1)
@@ -121,4 +286,8 @@ frame.grid(sticky='news')
 canvas.grid(row=0,column=1)
 scrollbar.grid(row=0, column=2, sticky='ns')
 scrollbar2.grid(row=1, column=1, sticky='ns')
+# ----------------------------------------------------------------
+
+#editor.bind("<Key>",onChange)
 initComponents()
+

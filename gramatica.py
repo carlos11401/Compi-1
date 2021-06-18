@@ -3,7 +3,10 @@ gramatica de JPR
 '''
 from Expresiones.Relacional import Relacional
 from TS.Exception import Excepcion
+from Reportes import Reportes as Reports
 
+errores = []
+listExceptions = []
 reservadas = {
     'var': 'RVAR', 'int': 'RINT', 'double': 'RDOUBLE', 'boolean': 'RBOOL', 'char': 'RCHAR', 'string': 'RSTRING',
     'null': 'RNULL',
@@ -210,6 +213,7 @@ def p_instruccion_error(t):
     errores.append(
         Excepcion("Sintáctico", "Error Sintáctico." + str(t[1].value), t.lineno(1), find_column(input, t.slice[1])))
     t[0] = ""
+
 # ///////////////////////////////////////INSTRUCCIONES//////////////////////////////////////////////////
 def p_imprimir(t):
     'print     : RPRINT PARA expresion PARC fin'
@@ -403,7 +407,6 @@ input = ''
 def getErrores():
     return errores
 
-
 def parse(inp):
     global errores
     global lexer
@@ -415,57 +418,67 @@ def parse(inp):
     input = inp
     return parser.parse(inp)
 
-
-# INTERFAZ
-
-f = open("./entrada.txt", "r")
-entrada = f.read()
-
 from TS.Arbol import Arbol
 from TS.TablaSimbolos import TablaSimbolos
 
-instrucciones = parse(entrada)  # ARBOL AST
-ast = Arbol(instrucciones)
-TSGlobal = TablaSimbolos()
-ast.setTSglobal(TSGlobal)
-for error in errores:  # CAPTURA DE ERRORES LEXICOS Y SINTACTICOS
-    ast.getExcepciones().append(error)
-    ast.updateConsola(error.toString())
+def generateCode(entrada):
+    if entrada != "":
+        instrucciones = parse(entrada)  # ARBOL AST
+        ast = Arbol(instrucciones)
+        TSGlobal = TablaSimbolos()
+        ast.setTSglobal(TSGlobal)
+        for error in errores:  # CAPTURA DE ERRORES LEXICOS Y SINTACTICOS
+            ast.getExcepciones().append(error)
+            ast.updateConsola(error.toString())
 
-for instruccion in ast.getInstrucciones():  # 1ERA PASADA (DECLARACIONES Y ASIGNACIONES)
-    if isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
-        value = instruccion.interpretar(ast, TSGlobal)
-        if isinstance(value, Excepcion):
-            ast.getExcepciones().append(value)
-            ast.updateConsola(value.toString())
-        if isinstance(value, Break):
-            err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila, instruccion.columna)
-            ast.getExcepciones().append(err)
-            ast.updateConsola(err.toString())
+        for instruccion in ast.getInstrucciones():  # 1ERA PASADA (DECLARACIONES Y ASIGNACIONES)
+            if isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
+                value = instruccion.interpretar(ast, TSGlobal)
+                if isinstance(value, Excepcion):
+                    ast.getExcepciones().append(value)
+                    ast.updateConsola(value.toString())
+                if isinstance(value, Break):
+                    err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila, instruccion.columna)
+                    ast.getExcepciones().append(err)
+                    ast.updateConsola(err.toString())
 
-for instruccion in ast.getInstrucciones():  # 2DA PASADA (MAIN)
-    contador = 0
-    if isinstance(instruccion, Main):
-        contador += 1
-        if contador == 2:  # VERIFICAR LA DUPLICIDAD
-            err = Excepcion("Semantico", "Existen 2 funciones Main", instruccion.fila, instruccion.columna)
-            ast.getExcepciones().append(err)
-            ast.updateConsola(err.toString())
-            break
-        value = instruccion.interpretar(ast, TSGlobal)
-        if isinstance(value, Excepcion):
-            ast.getExcepciones().append(value)
-            ast.updateConsola(value.toString())
-        if isinstance(value, Break):
-            err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila, instruccion.columna)
-            ast.getExcepciones().append(err)
-            ast.updateConsola(err.toString())
+        for instruccion in ast.getInstrucciones():  # 2DA PASADA (MAIN)
+            contador = 0
+            if isinstance(instruccion, Main):
+                contador += 1
+                if contador == 2:  # VERIFICAR LA DUPLICIDAD
+                    err = Excepcion("Semantico", "Existen 2 funciones Main", instruccion.fila, instruccion.columna)
+                    ast.getExcepciones().append(err)
+                    ast.updateConsola(err.toString())
+                    break
+                value = instruccion.interpretar(ast, TSGlobal)
+                if isinstance(value, Excepcion):
+                    ast.getExcepciones().append(value)
+                    ast.updateConsola(value.toString())
+                if isinstance(value, Break):
+                    err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila, instruccion.columna)
+                    ast.getExcepciones().append(err)
+                    ast.updateConsola(err.toString())
 
-for instruccion in ast.getInstrucciones():  # 3ERA PASADA (SENTENCIAS FUERA DE MAIN)
-    if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion)):
-        err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
-        ast.getExcepciones().append(err)
-        ast.updateConsola(err.toString())
+        for instruccion in ast.getInstrucciones():  # 3ERA PASADA (SENTENCIAS FUERA DE MAIN)
+            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion)):
+                err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
+                ast.getExcepciones().append(err)
+                ast.updateConsola(err.toString())
+        print(ast.getConsola())
+        for error in ast.getExcepciones():
+            listExceptions.append(error)
+        return ast.getConsola()
 
-print(ast.getConsola())
-
+def reportErrors():
+    global listExceptions
+    list = []
+    # SEMANTIC errors
+    for error in listExceptions:
+        list.append(error.tipo)
+        list.append(error.descripcion)
+        list.append(str(error.fila))
+        list.append(str(error.columna))
+    Reports.createHTML(list, "ReporteJPR")
+    listExceptions = []
+    errores = []
