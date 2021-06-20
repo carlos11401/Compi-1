@@ -13,7 +13,7 @@ class Decremento(Instruccion):
 
     def interpretar(self, tree, table):
         symbol = table.getTabla(self.identificador)
-        if symbol != None:
+        if symbol is not None:
             if symbol.tipo == TIPO.ENTERO or symbol.tipo == TIPO.DECIMAL:
                 self.tipo = symbol.tipo
                 updateSymbol = Simbolo(symbol.id,symbol.tipo,symbol.fila, symbol.columna,symbol.valor-1)

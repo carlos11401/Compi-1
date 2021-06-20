@@ -16,7 +16,8 @@ class Asignacion(Instruccion):
         if isinstance(value, Excepcion): return value
         # traer de la tabla el tipo de valor que tiene id
         id = table.getTabla(self.identificador)
-
+        if id is None:
+            return Excepcion("Semantico", "Variable \'"+self.identificador+"\' no encontrado.", self.fila, self.columna)
         if self.expresion.tipo == TIPO.NULO:
             simbolo = Simbolo(self.identificador, TIPO.NULO, self.fila, self.columna, "null")
             result = table.actualizarTabla(simbolo)

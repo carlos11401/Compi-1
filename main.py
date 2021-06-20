@@ -41,21 +41,20 @@ def recorrerInput(entrada):  #Funcion para obtener palabrvas reservadas, signos,
                 if entrada[counter] == "*":
                     val += entrada[counter]
                     counter += 1
+                    estado = 0
                     while counter < len(entrada):
-                        if entrada[counter] == "*":
-                            if counter+1 < len(entrada):
-                                val += entrada[counter]
-                                counter += 1
-                                if entrada[counter] == "#":
-                                    val += entrada[counter]
-                                    l = []
-                                    l.append("comment")
-                                    l.append(val)
-                                    lista.append(l)
-                                    val = ''
-                                    break
-                            val += entrada[counter]
                         val += entrada[counter]
+                        if estado == 0:
+                            if entrada[counter] == "*":
+                                estado = 1
+                        elif estado == 1:
+                            if entrada[counter] == "#":
+                                l = []
+                                l.append("comment")
+                                l.append(val)
+                                lista.append(l)
+                                val = ''
+                                break
                         counter += 1
                     break
                 # LINE COMMENT
@@ -154,6 +153,14 @@ def recorrerInput(entrada):  #Funcion para obtener palabrvas reservadas, signos,
     return lista
 def posicion(event):    #ACTUALIZAR POSICION
     pos.config(text = "[" + str(editor.index(INSERT)).replace(".",",") + "]" )
+def paintText():
+    global contentFile
+    contentFile = editor.get(1.0, "end")
+    editor.delete(1.0, "end")  # delete text in text area
+    input = recorrerInput(contentFile)
+    # to print colors of words
+    for s in input:
+        editor.insert(INSERT, s[1], s[0])
 # Creating tkinter window -----------------------
 root = Tk()
 root.title("ScrolledText Widget")
@@ -173,9 +180,10 @@ def openFile():
         # open file
         fileOpen = open(file)
         contentFile = fileOpen.read()
-        editor.delete(1.0, "end")    # delete text in text area
+        editor.delete(1.0, "end")  # delete text in text area
+        input = recorrerInput(contentFile)
         # to print colors of words
-        for s in recorrerInput(contentFile):
+        for s in input:
             editor.insert(INSERT, s[1], s[0])
         fileOpen.close()
     else:
@@ -199,20 +207,17 @@ def saveAs():
     save_file.write(editor.get(1.0, END))
     save_file.close()
     file = save
-'''aux = ""
-def onChange(event):  #Funcion para obtener palabrvas reservadas, signos, numeros, etc
-    global aux
-    if event.char == " ":
-        aux = editor.get(1.0, "end")
-        #aux = aux.replace('\n',' ')
-        print(aux)
-        editor.delete(1.0, "end")
-        for s in recorrerInput(aux):
-            editor.insert(INSERT, s[1], s[0])'''
 
-def initGrammar():
+'''def onChange(event):  #Funcion para obtener palabrvas reservadas, signos, numeros, etc
+    aux = editor.get(1.0, "end")
+    editor.delete(1.0, "end")
+    input = recorrerInput(aux)
+    for s in input[:-1]:
+        editor.insert(INSERT, s[1], s[0])'''
+
+def interpret():
     console.delete(1.0, "end")
-    contentFile = editor.get(1.0, "end")
+    paintText()
     console.insert(INSERT, Grammar.generateCode(contentFile))
 def initComponents():
     # create bar and menu ---------------------------------------
@@ -229,7 +234,8 @@ def initComponents():
     # create options ------------------------------------------
     mnuOptions = Menu(barMenu)
     # create commands of menus
-    mnuOptions.add_command(label="Start", command=initGrammar)
+    mnuOptions.add_command(label="Interpret", command=interpret)
+    mnuOptions.add_command(label="Color", command=paintText)
     mnuOptions.add_command(label="Report Errors", command=Grammar.reportErrors)
     # add menus at the bar menu
     barMenu.add_cascade(label="Options", menu=mnuOptions)
@@ -287,7 +293,6 @@ canvas.grid(row=0,column=1)
 scrollbar.grid(row=0, column=2, sticky='ns')
 scrollbar2.grid(row=1, column=1, sticky='ns')
 # ----------------------------------------------------------------
-
 #editor.bind("<Key>",onChange)
 initComponents()
 

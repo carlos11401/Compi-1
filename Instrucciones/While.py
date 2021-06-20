@@ -15,7 +15,6 @@ class While(Instruccion):
         while True:
             condicion = self.condicion.interpretar(tree, table)
             if isinstance(condicion, Excepcion): return condicion
-
             if self.condicion.tipo == TIPO.BOOLEANO:
                 if bool(condicion):   # VERIFICA SI ES VERDADERA LA CONDICION
                     nuevaTabla = TablaSimbolos(table)       # NUEVO ENTORNO

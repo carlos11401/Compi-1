@@ -132,8 +132,10 @@ class Aritmetica(Instruccion):
                 return self.obtenerVal(self.OperacionIzq.tipo, izq) * self.obtenerVal(self.OperacionDer.tipo, der)
             return Excepcion("Semantico", "Tipo Erroneo de operacion para *.", self.fila, self.columna)
         elif self.operador == OperadorAritmetico.DIV:  # -------------------------- DIVISION
+            if der == 0:
+                return Excepcion("Semantico", "Division por 0.", self.fila, self.columna)
             # ---------- entero
-            if self.OperacionIzq.tipo == TIPO.ENTERO and self.OperacionDer.tipo == TIPO.ENTERO:
+            elif self.OperacionIzq.tipo == TIPO.ENTERO and self.OperacionDer.tipo == TIPO.ENTERO:
                 self.tipo = TIPO.DECIMAL
                 return self.obtenerVal(self.OperacionIzq.tipo, izq) / self.obtenerVal(self.OperacionDer.tipo, der)
             elif self.OperacionIzq.tipo == TIPO.ENTERO and self.OperacionDer.tipo == TIPO.DECIMAL:

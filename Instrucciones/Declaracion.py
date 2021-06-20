@@ -12,11 +12,11 @@ class Declaracion(Instruccion):
         self.columna = columna
 
     def interpretar(self, tree, table):
-        if self.expresion != None:
-            value = self.expresion.interpretar(tree, table) # Valor a asignar a la variable
+        if self.expresion is not None:
+            value = self.expresion.interpretar(tree, table)  # Valor a asignar a la variable
             if isinstance(value, Excepcion): return value
             simbolo = Simbolo(str(self.identificador), self.expresion.tipo, self.fila, self.columna, value)
-            
+
             result = table.setTabla(simbolo)
             if isinstance(result, Excepcion): return result
         else:
@@ -24,4 +24,3 @@ class Declaracion(Instruccion):
             result = table.setTabla(simbolo)
             if isinstance(result, Excepcion): return result
         return None
-
