@@ -164,6 +164,8 @@ from Instrucciones.Incremento import Incremento
 from Instrucciones.Decremento import Decremento
 from Instrucciones.Asignacion import Asignacion
 from Instrucciones.Imprimir import Imprimir
+from Instrucciones.Llamada import Llamada
+from Instrucciones.Funcion import Funcion
 from Instrucciones.Switch import Switch
 from Instrucciones.While import While
 from Instrucciones.Break import Break
@@ -206,7 +208,9 @@ def p_instruccion(t):
                         | sentBreak
                         | sentFor
                         | sentSwitch
-                        | main'''
+                        | main
+                        | func
+                        | llam'''
     t[0] = t[1]
 def p_instruccion_error(t):
     'instruccion        : error PTCOMA'
@@ -304,6 +308,12 @@ def p_default(t):
 def p_main(t) :
     'main     : RMAIN PARA PARC LLAVEA instrucciones LLAVEC'
     t[0] = Main(t[5], t.lineno(1), find_column(input, t.slice[1]))
+def p_func(t):
+    'func : RFUNC ID PARA PARC LLAVEA instrucciones LLAVEC'
+    t[0] = Funcion(t[2], t[6], t.lineno(1), find_column(input, t.slice[1]))
+def p_llam(t):
+    'llam : ID PARA PARC fin'
+    t[0] = Llamada(t[1], t.lineno(1), find_column(input, t.slice[1]))
 # ///////////////////////////////////////EXPRESION//////////////////////////////////////////////////
 def p_expresion_unaria(t):
     '''expresion : MENOS expresion %prec UMENOS
@@ -436,6 +446,9 @@ def generateCode(entrada):
             ast.updateConsola(error.toString())
 
         for instruccion in ast.getInstrucciones():  # 1ERA PASADA (DECLARACIONES Y ASIGNACIONES)
+            # save functions
+            if isinstance(instruccion, Funcion):
+                ast.addFuncion(instruccion)
             if isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
                 value = instruccion.interpretar(ast, TSGlobal)
                 if isinstance(value, Excepcion):
@@ -465,7 +478,7 @@ def generateCode(entrada):
                     ast.updateConsola(err.toString())
 
         for instruccion in ast.getInstrucciones():  # 3ERA PASADA (SENTENCIAS FUERA DE MAIN)
-            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion)):
+            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion)):
                 err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
                 ast.getExcepciones().append(err)
                 ast.updateConsola(err.toString())

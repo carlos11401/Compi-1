@@ -1,11 +1,9 @@
 from TS.Exception import Excepcion
-from TS.Tipo import TIPO
 
 class TablaSimbolos:
     def __init__(self, anterior=None):
         self.tabla = {}  # Diccionario Vacio
         self.anterior = anterior
-        self.funciones = []
 
     def setTabla(self, simbolo):  # Agregar una variable
         if simbolo.id.lower() in self.tabla:
@@ -21,8 +19,6 @@ class TablaSimbolos:
                 return tablaActual.tabla[id.lower()]
             else:
                 tablaActual = tablaActual.anterior
-                if tablaActual is None:
-                    return None
         return None
 
     def actualizarTabla(self, simbolo):
