@@ -5,11 +5,12 @@ from Instrucciones.Break import Break
 
 
 class Funcion(Instruccion):
-    def __init__(self, nombre, instrucciones, fila, columna):
-        self.nombre = nombre.lower()
+    def __init__(self, nombre, parametros, instrucciones, fila, columna):
         self.instrucciones = instrucciones
-        self.fila = fila
+        self.parametros = parametros
+        self.nombre = nombre.lower()
         self.columna = columna
+        self.fila = fila
         self.tipo = None
 
     def interpretar(self, tree, table):

@@ -210,7 +210,7 @@ def p_instruccion(t):
                         | sentSwitch
                         | main
                         | func
-                        | llam'''
+                        | llam fin'''
     t[0] = t[1]
 def p_instruccion_error(t):
     'instruccion        : error PTCOMA'
@@ -308,12 +308,57 @@ def p_default(t):
 def p_main(t) :
     'main     : RMAIN PARA PARC LLAVEA instrucciones LLAVEC'
     t[0] = Main(t[5], t.lineno(1), find_column(input, t.slice[1]))
-def p_func(t):
+# --------------------- FUNCTIONS
+def p_func_void(t):
     'func : RFUNC ID PARA PARC LLAVEA instrucciones LLAVEC'
-    t[0] = Funcion(t[2], t[6], t.lineno(1), find_column(input, t.slice[1]))
+    t[0] = Funcion(t[2], None, t[6], t.lineno(1), find_column(input, t.slice[1]))
+def p_func_params(t) :
+    'func     : RFUNC ID PARA params PARC LLAVEA instrucciones LLAVEC'
+    t[0] = Funcion(t[2], t[4], t[7], t.lineno(1), find_column(input, t.slice[1]))
+# params to functions
+def p_params_params(t):
+    'params : params COMA param'
+    t[1].append(t[3])
+    t[0] = t[1]
+def p_params_param(t):
+    'params : param'
+    t[0] = [t[1]]
+def p_param(t) :
+    'param : tipo ID'
+    t[0] = {'tipo':t[1],'identificador':t[2]}
+def p_tipo(t) :
+    '''tipo     : RINT
+                | RDOUBLE
+                | RSTRING
+                | RBOOL
+                | RCHAR'''
+    if t[1].lower() == 'int':
+        t[0] = TIPO.ENTERO
+    elif t[1].lower() == 'float':
+        t[0] = TIPO.DECIMAL
+    elif t[1].lower() == 'string':
+        t[0] = TIPO.CADENA
+    elif t[1].lower() == 'boolean':
+        t[0] = TIPO.BOOLEANO
+    elif t[1].lower() == 'char':
+        t[0] = TIPO.CHARACTER
+# --------------------- CALL FUNCTIONS
 def p_llam(t):
-    'llam : ID PARA PARC fin'
-    t[0] = Llamada(t[1], t.lineno(1), find_column(input, t.slice[1]))
+    'llam : ID PARA PARC'
+    t[0] = Llamada(t[1], None, t.lineno(1), find_column(input, t.slice[1]))
+def p_llam_params(t) :
+    'llam : ID PARA params_llam PARC'
+    t[0] = Llamada(t[1], t[3], t.lineno(1), find_column(input, t.slice[1]))
+def p_params_llam_1(t):
+    'params_llam     : params_llam COMA param_llam'
+    t[1].append(t[3])
+    t[0] = t[1]
+def p_parametrosLL_2(t):
+    'params_llam : param_llam'
+    t[0] = [t[1]]
+def p_parametroLL(t) :
+    'param_llam     : expresion'
+    t[0] = t[1]
 # ///////////////////////////////////////EXPRESION//////////////////////////////////////////////////
 def p_expresion_unaria(t):
     '''expresion : MENOS expresion %prec UMENOS
