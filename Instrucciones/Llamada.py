@@ -15,12 +15,12 @@ class Llamada(Instruccion):
         result = tree.getFuncion(self.nombre.lower())  # OBTENER LA FUNCION
         if result is None:  # NO SE ENCONTRO LA FUNCION
             return Excepcion("Semantico", "NO SE ENCONTRO LA FUNCION: " + self.nombre, self.fila, self.columna)
-        newTable = TablaSimbolos(table)
+        newTable = TablaSimbolos(tree.getTSGlobal())
         # OBTENER PARAMETROS
         if len(result.parametros) == len(self.parametros):
             contador = 0
             for expresion in self.parametros:
-                resultExpresion = expresion.interpretar(tree,newTable)
+                resultExpresion = expresion.interpretar(tree,table)
                 if isinstance(resultExpresion, Excepcion): return resultExpresion
                 # VERIFICACION DE TIPO
                 if result.parametros[contador]["tipo"] == expresion.tipo:
