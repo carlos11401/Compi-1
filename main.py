@@ -149,7 +149,6 @@ def recorrerInput(entrada):  #Funcion para obtener palabrvas reservadas, signos,
         for key in Grammar.reservadas:
             if type(s[1]) is str and key == s[1].lower():
                 s[0] = 'reservada'
-
     return lista
 def posicion(event):    #ACTUALIZAR POSICION
     pos.config(text = "[" + str(editor.index(INSERT)).replace(".",",") + "]" )
@@ -159,7 +158,7 @@ def paintText():
     editor.delete(1.0, "end")  # delete text in text area
     input = recorrerInput(contentFile)
     # to print colors of words
-    for s in input:
+    for s in input[:-1]:
         editor.insert(INSERT, s[1], s[0])
 # Creating tkinter window -----------------------
 root = Tk()

@@ -166,6 +166,7 @@ from Instrucciones.Asignacion import Asignacion
 from Instrucciones.Imprimir import Imprimir
 from Instrucciones.Llamada import Llamada
 from Instrucciones.Funcion import Funcion
+from Instrucciones.Return import Return
 from Instrucciones.Switch import Switch
 from Instrucciones.While import While
 from Instrucciones.Break import Break
@@ -210,7 +211,8 @@ def p_instruccion(t):
                         | sentSwitch
                         | main
                         | func
-                        | llam fin'''
+                        | llam fin
+                        | return fin'''
     t[0] = t[1]
 def p_instruccion_error(t):
     'instruccion        : error PTCOMA'
@@ -342,6 +344,9 @@ def p_tipo(t) :
         t[0] = TIPO.BOOLEANO
     elif t[1].lower() == 'char':
         t[0] = TIPO.CHARACTER
+def p_return(t) :
+    'return     : RRETURN expresion'
+    t[0] = Return(t[2], t.lineno(1), find_column(input, t.slice[1]))
 # --------------------- CALL FUNCTIONS
 def p_llam(t):
     'llam : ID PARA PARC'
@@ -443,6 +448,9 @@ def p_expresion_identificador(t):
 def p_expresion_incremento_decremento(t):
     '''expresion : incremento
                  | decremento'''
+    t[0] = t[1]
+def p_expresion_llamada(t):
+    '''expresion : llam'''
     t[0] = t[1]
 # --------------- fin --------------
 def p_fin(t):
