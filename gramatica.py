@@ -485,6 +485,21 @@ def parse(inp):
     input = inp
     return parser.parse(inp)
 
+from Nativas.ToUpper import ToUpper
+from Nativas.ToLower import ToLower
+def crearNativas(ast):
+    nombre = "toupper"
+    params = [{'tipo':TIPO.CADENA,'identificador':'$toUpper_param'}]
+    instrucciones = []
+    toUpper = ToUpper(nombre, params, instrucciones,-1,-1)
+    ast.addFuncion(toUpper)  # Guardar la funcion en memoria
+
+    nombre = "tolower"
+    params = [{'tipo': TIPO.CADENA, 'identificador': '$toLower_param'}]
+    instrucciones = []
+    toLower = ToLower(nombre, params, instrucciones, -1, -1)
+    ast.addFuncion(toLower)  # Guardar la funcion en memoria
+
 from TS.Arbol import Arbol
 from TS.TablaSimbolos import TablaSimbolos
 
@@ -494,6 +509,7 @@ def generateCode(entrada):
         ast = Arbol(instrucciones)
         TSGlobal = TablaSimbolos()
         ast.setTSglobal(TSGlobal)
+        crearNativas(ast)
         for error in errores:  # CAPTURA DE ERRORES LEXICOS Y SINTACTICOS
             ast.getExcepciones().append(error)
             ast.updateConsola(error.toString())
