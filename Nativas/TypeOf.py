@@ -18,11 +18,14 @@ class TypeOf(Funcion):
             return Excepcion("Semantico", "Parametro no encontrado en funcion Length", self.fila, self.columna)
         self.tipo = simbolo.getTipo()
         tipo = ""
-        if self.tipo.name == "ENTER": tipo = "INT"
-        elif self.tipo.name == "DECIMAL": tipo = "DOUBLE"
-        elif self.tipo.name == "BOOLEANO": tipo = "BOOLEAN"
-        elif self.tipo.name == "CHARACTER": tipo = "CHAR"
-        elif self.tipo.name == "CADENA": tipo = "STRING"
-        elif self.tipo.name == "NULO": tipo = "NULL"
-        elif self.tipo.name == "ARREGLO": tipo = "ARREGLO"
-        return tipo
+        if self.tipo is not None:
+            if self.tipo.name == "ENTERO": tipo = "INT"
+            elif self.tipo.name == "DECIMAL": tipo = "DOUBLE"
+            elif self.tipo.name == "BOOLEANO": tipo = "BOOLEAN"
+            elif self.tipo.name == "CHARACTER": tipo = "CHAR"
+            elif self.tipo.name == "CADENA": tipo = "STRING"
+            elif self.tipo.name == "NULO": tipo = "NULL"
+            elif self.tipo.name == "ARREGLO": tipo = "ARREGLO"
+            return tipo
+        else:
+            return TIPO.NULO

@@ -178,6 +178,8 @@ from Expresiones.Identificador import Identificador
 from Expresiones.Primitivos import Primitivos
 from Expresiones.Aritmetica import Aritmetica
 from Expresiones.Logica import Logica
+from Expresiones.Casteo import Casteo
+from Expresiones.Read import Read
 from TS.Tipo import OperadorAritmetico, OperadorLogico, OperadorRelacional, TIPO
 
 
@@ -336,7 +338,7 @@ def p_tipo(t) :
                 | RCHAR'''
     if t[1].lower() == 'int':
         t[0] = TIPO.ENTERO
-    elif t[1].lower() == 'float':
+    elif t[1].lower() == 'double':
         t[0] = TIPO.DECIMAL
     elif t[1].lower() == 'string':
         t[0] = TIPO.CADENA
@@ -452,6 +454,12 @@ def p_expresion_incremento_decremento(t):
 def p_expresion_llamada(t):
     '''expresion : llam'''
     t[0] = t[1]
+def p_expresion_read(t):
+    '''expresion : RREAD PARA PARC'''
+    t[0] = Read(t.lineno(1), find_column(input, t.slice[1]))
+def p_expresion_cast(t):
+    '''expresion : PARA tipo PARC expresion'''
+    t[0] = Casteo(t[2],t[4],t.lineno(1), find_column(input, t.slice[1]))
 # --------------- fin --------------
 def p_fin(t):
     '''
@@ -491,6 +499,7 @@ from Nativas.ToLower import ToLower
 from Nativas.TypeOf import TypeOf
 from Nativas.Length import Length
 from Nativas.Round import Round
+
 def crearNativas(ast):
     nombre = "toupper"
     params = [{'tipo':TIPO.CADENA,'identificador':'$toUpper_param'}]

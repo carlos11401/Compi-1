@@ -41,4 +41,3 @@ class Logica(Instruccion):
         elif tipo == TIPO.BOOLEANO:
             return bool(val)
         return str(val)
-        

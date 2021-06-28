@@ -21,5 +21,5 @@ class Truncate(Funcion):
         if not(simbolo.getTipo() != TIPO.ENTERO or simbolo.getTipo() != TIPO.DECIMAL):
             return Exception("Semantico", "Parametro en funcion Truncate deberia ser de tipo entero o decimal.",self.fila,self.columna)
 
-        self.tipo = simbolo.getTipo()
+        self.tipo = TIPO.ENTERO
         return math.floor(simbolo.getValor())
