@@ -11,7 +11,7 @@ reservadas = {
     'var': 'RVAR', 'int': 'RINT', 'double': 'RDOUBLE', 'boolean': 'RBOOL', 'char': 'RCHAR', 'string': 'RSTRING',
     'null': 'RNULL',
     'main': 'RMAIN', 'read': 'RREAD', 'print': 'RPRINT', 'continue': 'RCONTINUE', 'return': 'RRETURN', 'new': 'RNEW',
-    'lenght': 'RLENGHT', 'truncate': 'RTRUNCATE', 'round': 'RROUND', 'tipeof': 'RTIPEOF', 'func': 'RFUNC',
+    'func': 'RFUNC',
     'switch': 'RSWITCH', 'case': 'RCASE', 'default': 'RDEFAULT', 'break': 'RBREAK',
     'toLower': 'RTOLOWER', 'toUpper': 'RTOUPPER',
     'while': 'RWHILE', 'for': 'RFOR',
@@ -485,8 +485,12 @@ def parse(inp):
     input = inp
     return parser.parse(inp)
 
+from Nativas.Truncate import Truncate
 from Nativas.ToUpper import ToUpper
 from Nativas.ToLower import ToLower
+from Nativas.TypeOf import TypeOf
+from Nativas.Length import Length
+from Nativas.Round import Round
 def crearNativas(ast):
     nombre = "toupper"
     params = [{'tipo':TIPO.CADENA,'identificador':'$toUpper_param'}]
@@ -499,6 +503,32 @@ def crearNativas(ast):
     instrucciones = []
     toLower = ToLower(nombre, params, instrucciones, -1, -1)
     ast.addFuncion(toLower)  # Guardar la funcion en memoria
+
+    nombre = "length"
+    params = [{'tipo': TIPO.CADENA, 'identificador': '$length_param'}]
+    instrucciones = []
+    length = Length(nombre, params, instrucciones, -1, -1)
+    ast.addFuncion(length)  # Guardar la funcion en memoria
+
+    nombre = "truncate"
+    params = [{'tipo': TIPO.ENTERO, 'identificador': '$truncate_param'},
+              {'tipo': TIPO.DECIMAL, 'identificador': '$truncate_param'}]
+    instrucciones = []
+    truncate = Truncate(nombre, params, instrucciones, -1, -1)
+    ast.addFuncion(truncate)  # Guardar la funcion en memoria
+
+    nombre = "round"
+    params = [{'tipo': TIPO.ENTERO, 'identificador': '$round_param'},
+              {'tipo': TIPO.DECIMAL, 'identificador': '$round_param'}]
+    instrucciones = []
+    round = Round(nombre, params, instrucciones, -1, -1)
+    ast.addFuncion(round)  # Guardar la funcion en memoria
+
+    nombre = "typeof"
+    params = [{'tipo': TIPO.NULO, 'identificador': '$typeof_param'}]
+    instrucciones = []
+    typeof = TypeOf(nombre, params, instrucciones, -1, -1)
+    ast.addFuncion(typeof)  # Guardar la funcion en memoria
 
 from TS.Arbol import Arbol
 from TS.TablaSimbolos import TablaSimbolos
