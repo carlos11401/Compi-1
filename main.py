@@ -1,8 +1,22 @@
+import time
 from os import terminal_size
 from tkinter import *
 from tkinter import filedialog, messagebox, ttk
+import threading
 import gramatica as Grammar
 import tkinter.scrolledtext as st
+
+# verify if there's a read in use
+def verifyRead():
+    while True:
+        time.sleep(0.5)
+        if Grammar.active == True:
+            console.insert(INSERT, Grammar.ast.getConsola())
+            Grammar.ast.setConsola("")
+            Grammar.active = False
+# create en start thread
+t = threading.Thread(target = verifyRead)
+t.start()
 
 def lineas(*args):      #ACTUALIZAR LINEAS
     lines.delete("all")
@@ -207,13 +221,6 @@ def saveAs():
     save_file.close()
     file = save
 
-'''def onChange(event):  #Funcion para obtener palabrvas reservadas, signos, numeros, etc
-    aux = editor.get(1.0, "end")
-    editor.delete(1.0, "end")
-    input = recorrerInput(aux)
-    for s in input[:-1]:
-        editor.insert(INSERT, s[1], s[0])'''
-
 def interpret():
     console.delete(1.0, "end")
     paintText()
@@ -292,6 +299,6 @@ canvas.grid(row=0,column=1)
 scrollbar.grid(row=0, column=2, sticky='ns')
 scrollbar2.grid(row=1, column=1, sticky='ns')
 # ----------------------------------------------------------------
-#editor.bind("<Key>",onChange)
+
 initComponents()
 

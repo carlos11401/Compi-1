@@ -315,7 +315,7 @@ def p_main(t) :
 # --------------------- FUNCTIONS
 def p_func_void(t):
     'func : RFUNC ID PARA PARC LLAVEA instrucciones LLAVEC'
-    t[0] = Funcion(t[2], None, t[6], t.lineno(1), find_column(input, t.slice[1]))
+    t[0] = Funcion(t[2], [], t[6], t.lineno(1), find_column(input, t.slice[1]))
 def p_func_params(t) :
     'func     : RFUNC ID PARA params PARC LLAVEA instrucciones LLAVEC'
     t[0] = Funcion(t[2], t[4], t[7], t.lineno(1), find_column(input, t.slice[1]))
@@ -352,7 +352,7 @@ def p_return(t) :
 # --------------------- CALL FUNCTIONS
 def p_llam(t):
     'llam : ID PARA PARC'
-    t[0] = Llamada(t[1], None, t.lineno(1), find_column(input, t.slice[1]))
+    t[0] = Llamada(t[1], [], t.lineno(1), find_column(input, t.slice[1]))
 def p_llam_params(t) :
     'llam : ID PARA params_llam PARC'
     t[0] = Llamada(t[1], t[3], t.lineno(1), find_column(input, t.slice[1]))
@@ -454,6 +454,8 @@ def p_expresion_incremento_decremento(t):
 def p_expresion_llamada(t):
     '''expresion : llam'''
     t[0] = t[1]
+
+
 def p_expresion_read(t):
     '''expresion : RREAD PARA PARC'''
     t[0] = Read(t.lineno(1), find_column(input, t.slice[1]))
@@ -541,8 +543,10 @@ def crearNativas(ast):
 
 from TS.Arbol import Arbol
 from TS.TablaSimbolos import TablaSimbolos
-
+ast = ""
+active = False
 def generateCode(entrada):
+    global ast
     if entrada != "":
         instrucciones = parse(entrada)  # ARBOL AST
         ast = Arbol(instrucciones)

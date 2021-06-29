@@ -1,16 +1,6 @@
 main(){
-    var num = 54.99
-    print(truncate(num))
-    num = 54.99
-    print(round(num))
-    var str = "my string";
-    var decimal = 56.76;
-    var bool = true;
-    var caracter = 'a';
-    var nulo = null;
-    print(typeof(num))
-    print(typeof(decimal))
-    print(typeof(str))
-    print(typeof(caracter))
-    print(typeof(nulo))
+    print("before")
+    var leer = read();
+    print(leer);
+    print("after");
 }
