@@ -5,6 +5,8 @@ class Arbol:
         self.excepciones = []
         self.consola = ""
         self.TSglobal = None
+        self.dot = ""
+        self.contador = 0
 
     def getInstrucciones(self):
         return self.instrucciones
@@ -44,3 +46,61 @@ class Arbol:
 
     def addFuncion(self, funcion):
         self.funciones.append(funcion)
+
+    def getDot(self, raiz):
+        self.dot = ""
+        self.dot += "digraph {\n"
+        self.dot += "n0[label=\"" + raiz.getValue().replace("\"","\\\"")+"\"];\n"
+        self.contador = 1
+        self.roamAST("n0", raiz)
+        self.dot += "}"
+        return self.dot
+
+    def roamAST(self, idFather, nodeFather):
+        for child in nodeFather.getChildren():
+            nameChild = "n"+str(self.contador)
+            value = child.getValue()
+            if value == "OperadorAritmetico.MAS": value = "+"
+            elif value == "OperadorAritmetico.MENOS": value = "-"
+            elif value == "OperadorAritmetico.UMENOS": value = "-"
+            elif value == "OperadorAritmetico.POR": value = "-"
+            elif value == "OperadorAritmetico.DIV":
+                value = "/"
+            elif value == "OperadorAritmetico.MOD":
+                value = "%"
+            elif value == "TIPO.ENTERO":
+                value = "INT"
+            elif value == "TIPO.DECIMAL":
+                value = "DOUBLE"
+            elif value == "TIPO.BOOLEANO":
+                value = "BOOLEAN"
+            elif value == "TIPO.CHARACTER":
+                value = "CHAR"
+            elif value == "TIPO.CADENA":
+                value = "STRING"
+            elif value == "TIPO.NULO":
+                value = "NULL"
+            elif value == "TIPO.ARREGLO":
+                value = "ARRAY"
+            elif value == "OperadorRelacional.MENOR":
+                value = "<"
+            elif value == "OperadorRelacional.MAYOR":
+                value = ">"
+            elif value == "OperadorRelacional.MENIGUAL":
+                value = "<="
+            elif value == "OperadorRelacional.MAYIGUAL":
+                value = ">="
+            elif value == "OperadorRelacional.IGUALIGUAL":
+                value = "=="
+            elif value == "OperadorRelacional.DIFERENTE":
+                value = "!="
+            elif value == "OperadorLogico.NOT":
+                value = "!"
+            elif value == "OperadorLogico.AND":
+                value = "&&"
+            elif value == "OperadorLogico.OR":
+                value = "||"
+            self.dot += nameChild + "[label=\"" + value + "\"];\n"
+            self.dot += idFather + "->" + nameChild + ";\n"
+            self.contador += 1
+            self.roamAST(nameChild, child)

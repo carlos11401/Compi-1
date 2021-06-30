@@ -1,3 +1,4 @@
+from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
 from TS.Exception import Excepcion
 from TS.Tipo import TIPO, OperadorAritmetico
@@ -191,6 +192,17 @@ class Aritmetica(Instruccion):
                 self.tipo = TIPO.DECIMAL
                 return - self.obtenerVal(self.OperacionIzq.tipo, izq)
             return Excepcion("Semantico", "Tipo Erroneo de operacion para - unario.", self.fila, self.columna)
+
+    def getNode(self):
+        node = NodoAST("ARITMETICA")
+        if self.OperacionDer is not None:
+            node.addNodeChild(self.OperacionIzq.getNode())
+            node.addChild(str(self.operador))
+            node.addNodeChild(self.OperacionDer.getNode())
+        else:
+            node.addChild(str(self.operador))
+            node.addNodeChild(self.OperacionIzq.getNode())
+        return node
 
     def obtenerVal(self, tipo, val):
         if tipo == TIPO.ENTERO:

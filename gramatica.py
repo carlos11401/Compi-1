@@ -4,6 +4,7 @@ gramatica de JPR
 from Expresiones.Relacional import Relacional
 from TS.Exception import Excepcion
 from Reportes import Reportes as Reports
+import os
 
 errores = []
 listExceptions = []
@@ -163,6 +164,7 @@ from Instrucciones.Declaracion import Declaracion
 from Instrucciones.Incremento import Incremento
 from Instrucciones.Decremento import Decremento
 from Instrucciones.Asignacion import Asignacion
+from Instrucciones.Continue import Continue
 from Instrucciones.Imprimir import Imprimir
 from Instrucciones.Llamada import Llamada
 from Instrucciones.Funcion import Funcion
@@ -214,7 +216,8 @@ def p_instruccion(t):
                         | main
                         | func
                         | llam fin
-                        | return fin'''
+                        | return fin
+                        | continue'''
     t[0] = t[1]
 def p_instruccion_error(t):
     'instruccion        : error PTCOMA'
@@ -261,6 +264,10 @@ def p_while(t):
 def p_break(t):
     'sentBreak     : RBREAK fin'
     t[0] = Break(t.lineno(1), find_column(input, t.slice[1]))
+# ------------------ CONTINUE
+def p_continue(t):
+    'continue     : RCONTINUE fin'
+    t[0] = Continue(t.lineno(1), find_column(input, t.slice[1]))
 # ----------------- FOR
 def p_for(t):
     '''
@@ -611,3 +618,21 @@ def reportErrors():
     Reports.createHTML(list, "ReporteJPR")
     listExceptions = []
     errores = []
+from Abstract.NodoAST import NodoAST
+def createAST():
+    init = NodoAST("RAIZ")
+    inst = NodoAST("INSTRUCCIONES")
+
+    for instruccion in ast.getInstrucciones():
+        inst.addNodeChild(instruccion.getNode())
+    init.addNodeChild(inst)
+    graph = ast.getDot(init)
+
+    dirname = os.path.dirname(__file__)
+    direcc = os.path.join(dirname, 'ast.dot')
+    arch = open(direcc, "w+")
+    arch.write(graph)
+    arch.close()
+    os.system('dot -T pdf -o ast.pdf ast.dot')
+
+

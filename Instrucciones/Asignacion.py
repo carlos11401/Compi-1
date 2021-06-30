@@ -1,3 +1,4 @@
+from Abstract.NodoAST import NodoAST
 from TS.Exception import Excepcion
 from Abstract.instruccion import Instruccion
 from TS.Simbolo import Simbolo
@@ -29,3 +30,8 @@ class Asignacion(Instruccion):
         if isinstance(result, Excepcion): return result
         return None
 
+    def getNode(self):
+        node = NodoAST("ASIGNACION")
+        node.addChild(str(self.identificador))
+        node.addNodeChild((self.expresion.getNode()))
+        return node

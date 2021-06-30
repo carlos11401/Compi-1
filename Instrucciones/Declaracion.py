@@ -1,3 +1,4 @@
+from Abstract.NodoAST import NodoAST
 from TS.Tipo import TIPO
 from TS.Exception import Excepcion
 from Abstract.instruccion import Instruccion
@@ -24,3 +25,10 @@ class Declaracion(Instruccion):
             result = table.setTabla(simbolo)
             if isinstance(result, Excepcion): return result
         return None
+
+    def getNode(self):
+        node = NodoAST("DECLARACION")
+        node.addChild(str(self.identificador))
+        if self.expresion is not None:
+            node.addNodeChild((self.expresion.getNode()))
+        return node

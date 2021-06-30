@@ -1,3 +1,4 @@
+from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
 from TS.Exception import Excepcion
 from TS.TablaSimbolos import TablaSimbolos
@@ -29,3 +30,19 @@ class Funcion(Instruccion):
                 self.tipo = value.tipo
                 return value.result
         return None
+
+    def getNode(self):
+        node = NodoAST("FUNCION")
+        node.addChild(str(self.nombre))
+        parametros = NodoAST("PARAMETROS")
+        for param in self.parametros:
+            parametro = NodoAST("PARAMETRO")
+            parametro.addChild(param["tipo"])
+            parametro.addChild(param["identificador"])
+            parametros.addNodeChild(parametro)
+        node.addNodeChild(parametros)
+        instrucciones = NodoAST("INSTRUCCIONES")
+        for inst in self.instrucciones:
+            instrucciones.addNodeChild(inst.getNode())
+        node.addNodeChild(instrucciones)
+        return node

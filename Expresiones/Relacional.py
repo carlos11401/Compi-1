@@ -1,3 +1,4 @@
+from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
 from TS.Exception import Excepcion
 from TS.Tipo import TIPO, OperadorRelacional
@@ -11,7 +12,6 @@ class Relacional(Instruccion):
         self.columna = columna
         self.tipo = TIPO.BOOLEANO
 
-    
     def interpretar(self, tree, table):
         izq = self.OperacionIzq.interpretar(tree, table)
         if isinstance(izq, Excepcion): return izq
@@ -127,6 +127,13 @@ class Relacional(Instruccion):
             return Excepcion("Semantico", "Tipo Erroneo de operacion para (!=).", self.fila, self.columna)
         return Excepcion("Semantico", "Tipo de Operacion no Especificado.", self.fila, self.columna)
 
+    def getNode(self):
+        node = NodoAST("RELACIONAL")
+        node.addNodeChild(self.OperacionIzq.getNode())
+        node.addChild(str(self.operador))
+        node.addNodeChild(self.OperacionDer.getNode())
+        return node
+
     def obtenerVal(self, tipo, val):
         if tipo == TIPO.ENTERO:
             return int(val)
@@ -135,4 +142,3 @@ class Relacional(Instruccion):
         elif tipo == TIPO.BOOLEANO:
             return bool(val)
         return str(val)
-        

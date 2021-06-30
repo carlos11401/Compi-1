@@ -1,7 +1,7 @@
 from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
 
-class Break(Instruccion):
+class Continue(Instruccion):
     def __init__(self, fila, columna):
         self.fila = fila
         self.columna = columna
@@ -10,5 +10,5 @@ class Break(Instruccion):
         return self
 
     def getNode(self):
-        node = NodoAST("BREAK")
+        node = NodoAST("CONTINUE")
         return node

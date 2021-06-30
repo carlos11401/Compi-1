@@ -1,3 +1,4 @@
+from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
 from TS.Exception import Excepcion
 from TS.Tipo import TIPO, OperadorLogico
@@ -78,3 +79,9 @@ class Casteo(Instruccion):
         elif tipo == TIPO.BOOLEANO:
             return bool(val)
         return str(val)
+
+    def getNode(self):
+        node = NodoAST("CASTEO")
+        node.addChild(str(self.tipo))
+        node.addNodeChild(self.expresion.getNode())
+        return node

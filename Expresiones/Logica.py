@@ -1,6 +1,8 @@
+from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
 from TS.Exception import Excepcion
 from TS.Tipo import TIPO, OperadorLogico
+
 
 class Logica(Instruccion):
     def __init__(self, operador, OperacionIzq, OperacionDer, fila, columna):
@@ -11,11 +13,10 @@ class Logica(Instruccion):
         self.columna = columna
         self.tipo = TIPO.BOOLEANO
 
-    
     def interpretar(self, tree, table):
         izq = self.OperacionIzq.interpretar(tree, table)
         if isinstance(izq, Excepcion): return izq
-        if self.OperacionDer != None:
+        if self.OperacionDer is not None:
             der = self.OperacionDer.interpretar(tree, table)
             if isinstance(der, Excepcion): return der
 
@@ -32,6 +33,17 @@ class Logica(Instruccion):
                 return not self.obtenerVal(self.OperacionIzq.tipo, izq)
             return Excepcion("Semantico", "Tipo Erroneo de operacion para !.", self.fila, self.columna)
         return Excepcion("Semantico", "Tipo de Operacion no Especificado.", self.fila, self.columna)
+
+    def getNode(self):
+        node = NodoAST("LOGICA")
+        if self.OperacionDer is not None:
+            node.addNodeChild(self.OperacionIzq.getNode())
+            node.addChild(str(self.operador))
+            node.addNodeChild(self.OperacionDer.getNode())
+        else:
+            node.addChild(str(self.operador))
+            node.addNodeChild(self.OperacionIzq.getNode())
+        return node
 
     def obtenerVal(self, tipo, val):
         if tipo == TIPO.ENTERO:

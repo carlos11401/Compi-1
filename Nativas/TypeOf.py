@@ -28,4 +28,5 @@ class TypeOf(Funcion):
             elif self.tipo.name == "ARREGLO": tipo = "ARREGLO"
             return tipo
         else:
-            return TIPO.NULO
+            tipo = "NULL"
+            return tipo

@@ -1,4 +1,6 @@
+from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
+from Instrucciones.Continue import Continue
 from TS.Exception import Excepcion
 from TS.TablaSimbolos import TablaSimbolos
 from Instrucciones.Break import Break
@@ -35,6 +37,7 @@ class Switch(Instruccion):
                         if isinstance(result, Break) :
                             brakeFound = True
                             return None
+                        if isinstance(result, Continue): return result
         # if there's default
         if not brakeFound and (self.default is not None):
             nuevaTabla = TablaSimbolos(table)
@@ -44,5 +47,20 @@ class Switch(Instruccion):
                     tree.getExcepciones().append(result)
                     tree.updateConsola(result.toString())
                     # to accept BRAKE and not how error
-                    if isinstance(result, Break): return None
+                if isinstance(result, Break): return None
+                if isinstance(result, Continue): return result
             return None
+
+    def getNode(self):
+        node = NodoAST("SWITCH")
+        node.addNodeChild(self.condicion.getNode())
+        instruccionesCases = NodoAST("INSTRUCCIONES CASES")
+        for case in self.cases:
+            instruccionesCases.addNodeChild(case.getNode())
+        node.addNodeChild(instruccionesCases)
+        if self.default is not None:
+            instruccionesDefault = NodoAST("INSTRUCCIONES DEFAULT")
+            for inst in self.default:
+                instruccionesDefault.addNodeChild(inst.getNode())
+            node.addNodeChild(instruccionesDefault)
+        return node

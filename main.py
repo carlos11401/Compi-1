@@ -241,6 +241,7 @@ def initComponents():
     mnuOptions = Menu(barMenu)
     # create commands of menus
     mnuOptions.add_command(label="Interpret", command=interpret)
+    mnuOptions.add_command(label="AST", command=Grammar.createAST)
     mnuOptions.add_command(label="Color", command=paintText)
     mnuOptions.add_command(label="Report Errors", command=Grammar.reportErrors)
     # add menus at the bar menu

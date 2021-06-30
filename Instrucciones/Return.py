@@ -1,3 +1,4 @@
+from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
 from TS.Exception import Excepcion
 
@@ -17,3 +18,8 @@ class Return(Instruccion):
         self.result = result            # VALOR DEL RESULT
 
         return self
+
+    def getNode(self):
+        node = NodoAST("RETURN")
+        node.addNodeChild(self.expresion.getNode())
+        return node
