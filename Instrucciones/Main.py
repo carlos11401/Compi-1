@@ -4,7 +4,6 @@ from TS.Exception import Excepcion
 from TS.TablaSimbolos import TablaSimbolos
 from Instrucciones.Break import Break
 
-
 class Main(Instruccion):
     def __init__(self, instrucciones, fila, columna):
         self.instrucciones = instrucciones

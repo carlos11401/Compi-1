@@ -17,7 +17,13 @@ def verifyRead():
 # create en start thread
 t = threading.Thread(target = verifyRead)
 t.start()
-
+def activeDebug():
+    Grammar.activeDebug(contentFile)
+def debuggear():
+    console.delete(1.0, "end")
+    paintText()
+    console.insert(INSERT, Grammar.debuggear(contentFile))
+    lb_rowDebug.config(text="ROW: "+str(Grammar.rowDebug))
 def lineas(*args):      #ACTUALIZAR LINEAS
     lines.delete("all")
 
@@ -242,6 +248,7 @@ def initComponents():
     # create commands of menus
     mnuOptions.add_command(label="Interpret", command=interpret)
     mnuOptions.add_command(label="AST", command=Grammar.createAST)
+    mnuOptions.add_command(label="Debug", command=activeDebug)
     mnuOptions.add_command(label="Color", command=paintText)
     mnuOptions.add_command(label="Report Errors", command=Grammar.reportErrors)
     # add menus at the bar menu
@@ -270,7 +277,9 @@ pos.grid(column = 1, row = 1)
 editor = st.ScrolledText(scrollable_frame, undo = True, width = 60, height = 20, wrap='none')
 lines = Canvas(scrollable_frame, width = 30, height = 320, background = 'gray60')
 console = st.ScrolledText(scrollable_frame, undo = True, width = 60, height = 20, wrap='none')
-btnNext = Button(scrollable_frame, width = 10, height = 1, text="Next")
+btnNext = Button(scrollable_frame, width = 10, height = 1, text="Next", command=debuggear)
+lb_rowDebug = ttk.Label(scrollable_frame)
+
 # CAMBIO DE COLORES
 editor.tag_config('reservada', foreground='blue')
 editor.tag_config('string', foreground='orange')
@@ -283,6 +292,7 @@ editor.tag_config('operacion', foreground='gold')
 # set position to widgets
 pos.grid(column = 1, row = 1)
 btnNext.grid(column = 2, row = 1)
+lb_rowDebug.grid(column = 2, row = 2)
 lines.grid(column = 0, row = 3)
 editor.grid(column = 1, row = 3, pady = 25, padx = 0)
 console.grid(column = 2, row = 3, pady = 25, padx = 0)

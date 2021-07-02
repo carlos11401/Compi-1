@@ -605,6 +605,74 @@ def generateCode(entrada):
         for error in ast.getExcepciones():
             listExceptions.append(error)
         return ast.getConsola()
+# ------------------------------------- DEBUG
+debug = False
+instrucciones = ""
+TSGlobal = TablaSimbolos()
+nuevaTabla = TablaSimbolos()  # test main
+countDebug = 0
+def activeDebug(entrada):
+    global debug, instrucciones, ast, TSGlobal, nuevaTabla
+    debug = True
+    if entrada != "":
+        instrucciones = parse(entrada)  # ARBOL AST
+        ast = Arbol(instrucciones)
+        TSGlobal = TablaSimbolos()
+        nuevaTabla = TablaSimbolos()
+        ast.setTSglobal(TSGlobal)
+        crearNativas(ast)
+        for error in errores:  # CAPTURA DE ERRORES LEXICOS Y SINTACTICOS
+            ast.getExcepciones().append(error)
+            ast.updateConsola(error.toString())
+
+        for instruccion in ast.getInstrucciones():  # 3ERA PASADA (SENTENCIAS FUERA DE MAIN)
+            if isinstance(instruccion, Funcion):  # save functions
+                ast.addFuncion(instruccion)
+            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion)):
+                err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
+                ast.getExcepciones().append(err)
+                ast.updateConsola(err.toString())
+rowDebug = 0
+instruccion = ""
+main = ""
+def debuggear(entrada):
+    global countDebug, debug, rowDebug, main, instruccion
+    if debug:
+        if not isinstance(instruccion, Main):
+            instruccion = instrucciones.pop(0)
+            # 1ERA PASADA (DECLARACIONES Y ASIGNACIONES) --------------
+            if isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
+                value = instruccion.interpretar(ast, TSGlobal)
+                rowDebug = instruccion.fila
+                if isinstance(value, Excepcion):
+                    ast.getExcepciones().append(value)
+                    ast.updateConsola(value.toString())
+                if isinstance(value, Break):
+                    err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila,
+                                    instruccion.columna)
+                    ast.getExcepciones().append(err)
+                    ast.updateConsola(err.toString())
+        if isinstance(instruccion, Main):
+            # 2DA PASADA ---------------------- EJECT MAIN ------------------
+            if len(instruccion.instrucciones) != 0:
+                inst = instruccion.instrucciones.pop(0)
+                rowDebug = inst.fila
+
+                value = inst.interpretar(ast, TSGlobal)
+                if isinstance(value, Excepcion):
+                    ast.getExcepciones().append(value)
+                    ast.updateConsola(value.toString())
+                if isinstance(value, Break):
+                    err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", inst.fila, inst.columna)
+                    ast.getExcepciones().append(err)
+                    ast.updateConsola(err.toString())
+                for error in ast.getExcepciones():
+                    listExceptions.append(error)
+                countDebug += 1
+            else:
+                rowDebug = 0
+                debug = False
+    return ast.getConsola()
 
 def reportErrors():
     global listExceptions
@@ -618,6 +686,7 @@ def reportErrors():
     Reports.createHTML(list, "ReporteJPR")
     listExceptions = []
     errores = []
+
 from Abstract.NodoAST import NodoAST
 def createAST():
     init = NodoAST("RAIZ")
