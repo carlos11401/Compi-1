@@ -11,8 +11,9 @@ def verifyRead():
     while True:
         time.sleep(0.5)
         if Grammar.active == True:
-            console.insert(INSERT, Grammar.ast.getConsola())
-            Grammar.ast.setConsola("")
+            console.delete("1.0", END)
+            if not Grammar.debug:
+                console.insert(1.0, Grammar.ast.getConsola())
             Grammar.active = False
 # create en start thread
 t = threading.Thread(target = verifyRead)
