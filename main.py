@@ -3,9 +3,11 @@ from os import terminal_size
 from tkinter import *
 from tkinter import filedialog, messagebox, ttk
 import threading
+
+import Reportes.Reportes
 import gramatica as Grammar
 import tkinter.scrolledtext as st
-
+import Reportes.Reportes as Report
 # verify if there's a read in use
 def verifyRead():
     while True:
@@ -241,19 +243,22 @@ def initComponents():
     mnuFile.add_command(label="New", command=newFile)
     mnuFile.add_command(label="Save", command=saveFile)
     mnuFile.add_command(label="Save as", command=saveAs)
-    # add menus at the bar menu
-    barMenu.add_cascade(label="File", menu=mnuFile)
-
     # create options ------------------------------------------
     mnuOptions = Menu(barMenu)
     # create commands of menus
     mnuOptions.add_command(label="Interpret", command=interpret)
-    mnuOptions.add_command(label="AST", command=Grammar.createAST)
     mnuOptions.add_command(label="Debug", command=activeDebug)
     mnuOptions.add_command(label="Color", command=paintText)
-    mnuOptions.add_command(label="Report Errors", command=Grammar.reportErrors)
+    # create reports ------------------------------------------
+    mnuReports = Menu(barMenu)
+    # create commands of menus
+    mnuReports.add_command(label="AST", command=Grammar.createAST)
+    mnuReports.add_command(label="TS", command=Grammar.reportTS)
+    mnuReports.add_command(label="Report Errors", command=Grammar.reportErrors)
     # add menus at the bar menu
+    barMenu.add_cascade(label="File", menu=mnuFile)
     barMenu.add_cascade(label="Options", menu=mnuOptions)
+    barMenu.add_cascade(label="Reports", menu=mnuReports)
     # indicate that bar menu will be in the window
     root.config(menu=barMenu)
     root.mainloop()

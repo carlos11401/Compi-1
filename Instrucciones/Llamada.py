@@ -12,6 +12,7 @@ class Llamada(Instruccion):
         self.nombre = nombre
         self.columna = columna
         self.fila = fila
+        self.isArray = False
 
     def interpretar(self, tree, table):
         result = tree.getFuncion(self.nombre.lower())  # OBTENER LA FUNCION

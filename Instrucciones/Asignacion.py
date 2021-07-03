@@ -11,6 +11,7 @@ class Asignacion(Instruccion):
         self.expresion = expresion
         self.fila = fila
         self.columna = columna
+        self.isArray = False
 
     def interpretar(self, tree, table):
         value = self.expresion.interpretar(tree, table) # Valor a asignar a la variable

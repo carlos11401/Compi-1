@@ -12,6 +12,7 @@ class Case(Instruccion):
     def interpretar(self, tree, table):
         condicion = self.condicion.interpretar(tree, table)
         if isinstance(condicion, Excepcion): return condicion
+
         return self.instrucciones, condicion
 
     def getNode(self):

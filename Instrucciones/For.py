@@ -1,11 +1,14 @@
 from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
 from Instrucciones.Continue import Continue
+from Instrucciones.Declaracion import Declaracion
+from Instrucciones.DeclaracionArr1 import DeclaracionArr1
 from TS.Exception import Excepcion
 from TS.Tipo import TIPO
 from TS.TablaSimbolos import TablaSimbolos
 from Instrucciones.Return import Return
 from Instrucciones.Break import Break
+import gramatica as Grammar
 
 class For(Instruccion):
     def __init__(self, init, condicion, actualizacion, instrucciones, fila, columna):
@@ -27,6 +30,12 @@ class For(Instruccion):
                 if bool(condicion):   # VERIFICA SI ES VERDADERA LA CONDICION
                     newTableInstr = TablaSimbolos(newTable)       # NUEVO ENTORNO
                     for instruccion in self.instrucciones:
+                        if isinstance(instruccion, Declaracion) or isinstance(instruccion, DeclaracionArr1):
+                            Grammar.infTS[instruccion.identificador.lower() + str(newTableInstr)] = ["For",
+                                                                                                  instruccion.identificador,
+                                                                                                  None, None, None,
+                                                                                                  instruccion.fila,
+                                                                                                  instruccion.columna]
                         result = instruccion.interpretar(tree, newTableInstr)  # ejecutar instrucciones dentro de WHILE
                         if isinstance(result, Excepcion) :
                             tree.getExcepciones().append(result)

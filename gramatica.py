@@ -23,7 +23,7 @@ tokens = [
              'IGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENIGUAL', 'MAYIGUAL', 'IGUALIGUAL',
              'MAS', 'MENOS', 'MASMAS', 'MENOSMENOS', 'POR', 'DIV', 'MOD', 'POT',
              'PTCOMA', 'DOSPUNTOS', 'COMA', 'COMILLASIMPLE', 'COMILLADOBLE',
-             'DECIMAL', 'ENTERO', 'CADENA', 'BOOL', 'CHAR', 'ID',
+             'DECIMAL', 'ENTERO', 'CADENA', 'BOOL', 'CHAR', 'ID', 'ARRTIPO2',
              'PARA', 'PARC', 'CORA', 'CORC', 'LLAVEA', 'LLAVEC',
              'COMENTARIO', 'COMENTARIOMULTI',
              'OR', 'AND', 'NOT'
@@ -297,11 +297,15 @@ def p_actualizacion_decremento(t):
     t[0] = Decremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
 # ------------------------------ DECLARACION ARREGLOS
 def p_declArr(t):
-    '''declaArr : tipo1'''
+    '''declaArr : tipoArr'''
     t[0] = t[1]
 def p_tipo1(t):
-    '''tipo1 : tipo lista_Dim ID IGUAL RNEW tipo lista_expresiones'''
+    '''tipoArr : tipo lista_Dim ID IGUAL RNEW tipo lista_expresiones'''
     t[0] = DeclaracionArr1(t[1], t[2], t[3], t[6], t[7], t.lineno(3), find_column(input, t.slice[3]))
+def p_tipo2(t):
+    'tipoArr : tipo lista_Dim ID IGUAL ARRTIPO2'
+    t[0] = DeclaracionArr2(t[1], t[2], t[3], t[5], t.lineno(3), find_column(input, t.slice[3]))
+
 def p_lista_Dim1(t):
     'lista_Dim     : lista_Dim CORA CORC'
     t[0] = t[1] + 1
@@ -315,6 +319,7 @@ def p_lista_expresiones_1(t):
 def p_lista_expresiones_2(t):
     'lista_expresiones    : CORA expresion CORC'
     t[0] = [t[2]]
+
 # ------------------------------ MODIFICACION ARREGLOS
 def p_modArr(t) :
     '''modArr     :  ID lista_expresiones IGUAL expresion'''
@@ -585,9 +590,11 @@ from TS.Arbol import Arbol
 from TS.TablaSimbolos import TablaSimbolos
 ast = ""
 active = False
+infTS = {}
 def generateCode(entrada):
     global ast
     if entrada != "":
+        infTS.clear()
         instrucciones = parse(entrada)  # ARBOL AST
         ast = Arbol(instrucciones)
         TSGlobal = TablaSimbolos()
@@ -602,6 +609,8 @@ def generateCode(entrada):
             if isinstance(instruccion, Funcion):
                 ast.addFuncion(instruccion)
             if isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)or isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
+                if isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, Declaracion):
+                    infTS[instruccion.identificador.lower()+str(TSGlobal)] = ["Global",instruccion.identificador,None,None,None,instruccion.fila,instruccion.columna]
                 value = instruccion.interpretar(ast, TSGlobal)
                 if isinstance(value, Excepcion):
                     ast.getExcepciones().append(value)
@@ -610,6 +619,7 @@ def generateCode(entrada):
                     err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila, instruccion.columna)
                     ast.getExcepciones().append(err)
                     ast.updateConsola(err.toString())
+
 
         for instruccion in ast.getInstrucciones():  # 2DA PASADA (MAIN)
             contador = 0
@@ -634,7 +644,6 @@ def generateCode(entrada):
                 err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
                 ast.getExcepciones().append(err)
                 ast.updateConsola(err.toString())
-        print(ast.getConsola())
         for error in ast.getExcepciones():
             listExceptions.append(error)
         return ast.getConsola()
@@ -709,6 +718,8 @@ def debuggear(entrada):
                 instruccion = ""
     return ast.getConsola()
 
+def reportTS():
+    Reports.createHTML_TS(infTS, "Reporte_TS")
 def reportErrors():
     global listExceptions
     list = []
@@ -738,5 +749,7 @@ def createAST():
     arch.write(graph)
     arch.close()
     os.system('dot -T pdf -o ast.pdf ast.dot')
+
+
 
 

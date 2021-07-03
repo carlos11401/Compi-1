@@ -1,5 +1,5 @@
 from TS.Exception import Excepcion
-
+import gramatica as Grammar
 class TablaSimbolos:
     def __init__(self, anterior=None):
         self.tabla = {}  # Diccionario Vacio
@@ -27,6 +27,9 @@ class TablaSimbolos:
             if simbolo.id.lower() in tablaActual.tabla:
                 tablaActual.tabla[simbolo.id.lower()].setValor(simbolo.getValor())
                 tablaActual.tabla[simbolo.id.lower()].setTipo(simbolo.getTipo())
+                Grammar.infTS[simbolo.id.lower() + str(tablaActual)][2] = simbolo.getValor()
+                Grammar.infTS[simbolo.id.lower() + str(tablaActual)][3] = simbolo.getTipo()
+                Grammar.infTS[simbolo.id.lower() + str(tablaActual)][4] = simbolo.getIsArray()
                 return None
             else:
                 tablaActual = tablaActual.anterior

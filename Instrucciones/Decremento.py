@@ -11,6 +11,7 @@ class Decremento(Instruccion):
         self.tipo = None
         self.fila = fila
         self.columna = columna
+        self.isArray = False
 
     def interpretar(self, tree, table):
         symbol = table.getTabla(self.identificador)

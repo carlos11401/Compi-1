@@ -3,7 +3,7 @@ from TS.Tipo import TIPO
 from TS.Exception import Excepcion
 from Abstract.instruccion import Instruccion
 from TS.Simbolo import Simbolo
-
+import gramatica as Grammar
 
 class Declaracion(Instruccion):
     def __init__(self, identificador, fila, columna, expresion=None):
@@ -11,6 +11,7 @@ class Declaracion(Instruccion):
         self.expresion = expresion
         self.fila = fila
         self.columna = columna
+        self.isArray = False
 
     def interpretar(self, tree, table):
         if self.expresion is not None:
@@ -24,6 +25,9 @@ class Declaracion(Instruccion):
             simbolo = Simbolo(str(self.identificador), TIPO.NULO, False, self.fila, self.columna, None)
             result = table.setTabla(simbolo)
             if isinstance(result, Excepcion): return result
+        Grammar.infTS[self.identificador.lower()+str(table)][2] = simbolo.getValor()
+        Grammar.infTS[self.identificador.lower() + str(table)][3] = simbolo.getTipo()
+        Grammar.infTS[self.identificador.lower() + str(table)][4] = simbolo.getIsArray()
         return None
 
     def getNode(self):

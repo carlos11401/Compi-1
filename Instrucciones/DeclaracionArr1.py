@@ -4,7 +4,7 @@ from TS.Exception import Excepcion
 from Abstract.instruccion import Instruccion
 from TS.Simbolo import Simbolo
 import copy
-
+import gramatica as Grammar
 
 class DeclaracionArr1(Instruccion):
 
@@ -27,8 +27,12 @@ class DeclaracionArr1(Instruccion):
         # CREACION DEL ARREGLO
         value = self.crearDimensiones(tree, table, copy.copy(self.expresiones))  # RETORNA EL ARREGLO DE DIMENSIONES
         if isinstance(value, Excepcion): return value
+
         simbolo = Simbolo(str(self.identificador), self.tipo1, self.isArray, self.fila, self.columna, value)
         result = table.setTabla(simbolo)
+        Grammar.infTS[self.identificador.lower() + str(table)][2] = simbolo.getValor()
+        Grammar.infTS[self.identificador.lower() + str(table)][3] = simbolo.getTipo()
+        Grammar.infTS[self.identificador.lower() + str(table)][4] = simbolo.getIsArray()
         if isinstance(result, Excepcion): return result
         return None
 

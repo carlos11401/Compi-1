@@ -1,9 +1,12 @@
 from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
+from Instrucciones.DeclaracionArr1 import DeclaracionArr1
 from TS.Exception import Excepcion
 from TS.TablaSimbolos import TablaSimbolos
 from Instrucciones.Return import Return
 from Instrucciones.Break import Break
+from Instrucciones.Declaracion import Declaracion
+import gramatica as Grammar
 
 
 class Funcion(Instruccion):
@@ -18,6 +21,9 @@ class Funcion(Instruccion):
     def interpretar(self, tree, table):
         nuevaTabla = TablaSimbolos(table)
         for instruccion in self.instrucciones:  # REALIZAR LAS ACCIONES
+            if isinstance(instruccion, Declaracion) or isinstance(instruccion, DeclaracionArr1):
+                Grammar.infTS[instruccion.identificador.lower()+str(nuevaTabla)] = ["Funcion",instruccion.identificador,None,None,None,instruccion.fila,instruccion.columna]
+
             value = instruccion.interpretar(tree, nuevaTabla)
             if isinstance(value, Excepcion):
                 tree.getExcepciones().append(value)

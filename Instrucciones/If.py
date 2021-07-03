@@ -1,12 +1,14 @@
 from Abstract.NodoAST import NodoAST
 from Abstract.instruccion import Instruccion
+from Instrucciones.Declaracion import Declaracion
+from Instrucciones.DeclaracionArr1 import DeclaracionArr1
 from TS.Exception import Excepcion
 from TS.Tipo import TIPO
 from TS.TablaSimbolos import TablaSimbolos
 from Instrucciones.Continue import Continue
 from Instrucciones.Return import Return
 from Instrucciones.Break import Break
-
+import gramatica as Grammar
 
 class If(Instruccion):
     def __init__(self, condicion, instruccionesIf, instruccionesElse, ElseIf, fila, columna):
@@ -25,6 +27,13 @@ class If(Instruccion):
             if bool(condicion):  # VERIFICA SI ES VERDADERA LA CONDICION
                 nuevaTabla = TablaSimbolos(table)  # NUEVO ENTORNO
                 for instruccion in self.instruccionesIf:
+                    if isinstance(instruccion, Declaracion) or isinstance(instruccion, DeclaracionArr1):
+                        Grammar.infTS[instruccion.identificador.lower() + str(nuevaTabla)] = ["If",
+                                                                                              instruccion.identificador,
+                                                                                              None, None, None,
+                                                                                              instruccion.fila,
+                                                                                              instruccion.columna]
+
                     result = instruccion.interpretar(tree, nuevaTabla)  # EJECUTA INSTRUCCION ADENTRO DEL IF
                     if isinstance(result, Excepcion):
                         tree.getExcepciones().append(result)
@@ -35,6 +44,13 @@ class If(Instruccion):
                 if self.instruccionesElse is not None:
                     nuevaTabla = TablaSimbolos(table)  # NUEVO ENTORNO
                     for instruccion in self.instruccionesElse:
+                        if isinstance(instruccion, Declaracion) or isinstance(instruccion, DeclaracionArr1):
+                            Grammar.infTS[instruccion.identificador.lower() + str(nuevaTabla)] = ["Else",
+                                                                                                  instruccion.identificador,
+                                                                                                  None, None, None,
+                                                                                                  instruccion.fila,
+                                                                                                  instruccion.columna]
+
                         result = instruccion.interpretar(tree, nuevaTabla)  # EJECUTA INSTRUCCION ADENTRO DEL IF
                         if isinstance(result, Excepcion):
                             tree.getExcepciones().append(result)
