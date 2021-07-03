@@ -17,7 +17,7 @@ class Decremento(Instruccion):
         if symbol is not None:
             if symbol.tipo == TIPO.ENTERO or symbol.tipo == TIPO.DECIMAL:
                 self.tipo = symbol.tipo
-                updateSymbol = Simbolo(symbol.id, symbol.tipo, symbol.fila, symbol.columna, symbol.value - 1)
+                updateSymbol = Simbolo(symbol.id, symbol.tipo, False, symbol.fila, symbol.columna, symbol.value - 1)
                 table.actualizarTabla(updateSymbol)
             else:
                 return Excepcion("Semantico", "Tipo de dato no se puede decrementar.", self.fila, self.columna)

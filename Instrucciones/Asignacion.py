@@ -20,10 +20,10 @@ class Asignacion(Instruccion):
         if id is None:
             return Excepcion("Semantico", "Variable \'"+self.identificador+"\' no encontrado.", self.fila, self.columna)
         if self.expresion.tipo == TIPO.NULO:
-            simbolo = Simbolo(self.identificador, TIPO.NULO, self.fila, self.columna, "null")
+            simbolo = Simbolo(self.identificador, TIPO.NULO, False,self.fila, self.columna, "null")
             result = table.actualizarTabla(simbolo)
         elif id.tipo == TIPO.NULO or id.tipo == self.expresion.tipo:
-            simbolo = Simbolo(self.identificador, self.expresion.tipo, self.fila, self.columna, value)
+            simbolo = Simbolo(self.identificador, self.expresion.tipo, False, self.fila, self.columna, value)
             result = table.actualizarTabla(simbolo)
         elif id.tipo != self.expresion.tipo:
             return Excepcion("Semantico", "Tipo de dato diferente en Declaracion", self.fila, self.columna)

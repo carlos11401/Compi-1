@@ -160,6 +160,8 @@ precedence = (
 # Definición de la gramática
 
 # Abstract
+from Instrucciones.DeclaracionArr1 import DeclaracionArr1
+from Instrucciones.ModificarArr import ModificarArr
 from Instrucciones.Declaracion import Declaracion
 from Instrucciones.Incremento import Incremento
 from Instrucciones.Decremento import Decremento
@@ -177,6 +179,7 @@ from Instrucciones.Case import Case
 from Instrucciones.For import For
 from Instrucciones.If import If
 from Expresiones.Identificador import Identificador
+from Expresiones.AccesoArr import AccesoArr
 from Expresiones.Primitivos import Primitivos
 from Expresiones.Aritmetica import Aritmetica
 from Expresiones.Logica import Logica
@@ -217,7 +220,9 @@ def p_instruccion(t):
                         | func
                         | llam fin
                         | return fin
-                        | continue'''
+                        | continue
+                        | declaArr fin
+                        | modArr fin'''
     t[0] = t[1]
 def p_instruccion_error(t):
     'instruccion        : error PTCOMA'
@@ -274,6 +279,7 @@ def p_for(t):
     sentFor : RFOR PARA initFor PTCOMA expresion PTCOMA actualizacion PARC LLAVEA instrucciones LLAVEC
     '''
     t[0] = For(t[3],t[5],t[7],t[10],t.lineno(2), find_column(input, t.slice[2]))
+# ------------------------------ DECLARACION Y ASIGNACION
 def p_init_declaracion(t):
     'initFor : RVAR ID IGUAL expresion'
     t[0] = Declaracion(t[2], t.lineno(2), find_column(input, t.slice[2]), t[4])
@@ -289,7 +295,31 @@ def p_actualizacion_incremento(t):
 def p_actualizacion_decremento(t):
     'actualizacion : ID MENOSMENOS'
     t[0] = Decremento(t[1], t.lineno(1), find_column(input, t.slice[1]))
-# --------------- SWITCH
+# ------------------------------ DECLARACION ARREGLOS
+def p_declArr(t):
+    '''declaArr : tipo1'''
+    t[0] = t[1]
+def p_tipo1(t):
+    '''tipo1 : tipo lista_Dim ID IGUAL RNEW tipo lista_expresiones'''
+    t[0] = DeclaracionArr1(t[1], t[2], t[3], t[6], t[7], t.lineno(3), find_column(input, t.slice[3]))
+def p_lista_Dim1(t):
+    'lista_Dim     : lista_Dim CORA CORC'
+    t[0] = t[1] + 1
+def p_lista_Dim2(t):
+    'lista_Dim    : CORA CORC'
+    t[0] = 1
+def p_lista_expresiones_1(t):
+    'lista_expresiones     : lista_expresiones CORA expresion CORC'
+    t[1].append(t[3])
+    t[0] = t[1]
+def p_lista_expresiones_2(t):
+    'lista_expresiones    : CORA expresion CORC'
+    t[0] = [t[2]]
+# ------------------------------ MODIFICACION ARREGLOS
+def p_modArr(t) :
+    '''modArr     :  ID lista_expresiones IGUAL expresion'''
+    t[0] = ModificarArr(t[1], t[2], t[4], t.lineno(1), find_column(input, t.slice[1]))
+# ---------------------------- SWITCH
 def p_switch_cases_default(t):
     'sentSwitch : RSWITCH PARA expresion PARC LLAVEA cases default LLAVEC'
     t[0] = Switch(t[3],t[6],t[7],t.lineno(1), find_column(input, t.slice[1]))
@@ -469,6 +499,9 @@ def p_expresion_read(t):
 def p_expresion_cast(t):
     '''expresion : PARA tipo PARC expresion'''
     t[0] = Casteo(t[2],t[4],t.lineno(1), find_column(input, t.slice[1]))
+def p_expresion_Arreglo(t):
+    '''expresion : ID lista_expresiones'''
+    t[0] = AccesoArr(t[1], t[2], t.lineno(1), find_column(input, t.slice[1]))
 # --------------- fin --------------
 def p_fin(t):
     '''
@@ -568,7 +601,7 @@ def generateCode(entrada):
             # save functions
             if isinstance(instruccion, Funcion):
                 ast.addFuncion(instruccion)
-            if isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
+            if isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)or isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
                 value = instruccion.interpretar(ast, TSGlobal)
                 if isinstance(value, Excepcion):
                     ast.getExcepciones().append(value)
@@ -597,7 +630,7 @@ def generateCode(entrada):
                     ast.updateConsola(err.toString())
 
         for instruccion in ast.getInstrucciones():  # 3ERA PASADA (SENTENCIAS FUERA DE MAIN)
-            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion)):
+            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion) or isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)):
                 err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
                 ast.getExcepciones().append(err)
                 ast.updateConsola(err.toString())
@@ -628,7 +661,7 @@ def activeDebug(entrada):
         for instruccion in ast.getInstrucciones():  # 3ERA PASADA (SENTENCIAS FUERA DE MAIN)
             if isinstance(instruccion, Funcion):  # save functions
                 ast.addFuncion(instruccion)
-            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion)):
+            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion) or isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)):
                 err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
                 ast.getExcepciones().append(err)
                 ast.updateConsola(err.toString())
@@ -641,7 +674,8 @@ def debuggear(entrada):
         if not isinstance(instruccion, Main):
             instruccion = instrucciones.pop(0)
             # 1ERA PASADA (DECLARACIONES Y ASIGNACIONES) --------------
-            if isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
+            if isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)or isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
+
                 value = instruccion.interpretar(ast, TSGlobal)
                 rowDebug = instruccion.fila
                 if isinstance(value, Excepcion):
@@ -672,6 +706,7 @@ def debuggear(entrada):
             else:
                 rowDebug = 0
                 debug = False
+                instruccion = ""
     return ast.getConsola()
 
 def reportErrors():

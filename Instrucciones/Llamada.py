@@ -26,7 +26,7 @@ class Llamada(Instruccion):
                     if isinstance(resultExpresion, Excepcion): return resultExpresion
                     # CREACION DE SIMBOLO E INGRESARLO A LA TABLA DE SIMBOLOS
                     simbolo = Simbolo(str(result.parametros[contador]['identificador']).lower(),
-                                      expresion.tipo, self.fila, self.columna, resultExpresion)
+                                      expresion.tipo, False, self.fila, self.columna, resultExpresion)
                     resultTabla = newTable.setTabla(simbolo)
                     if isinstance(resultTabla, Excepcion): return resultTabla
                     contador += 1
@@ -42,7 +42,7 @@ class Llamada(Instruccion):
                     if result.parametros[0]["tipo"] == expresion.tipo or result.parametros[1]["tipo"] == expresion.tipo:
                         # CREACION DE SIMBOLO E INGRESARLO A LA TABLA DE SIMBOLOS
                         simbolo = Simbolo(str(result.parametros[contador]['identificador']).lower(),
-                                          result.parametros[contador]['tipo'], self.fila, self.columna, resultExpresion)
+                                          result.parametros[contador]['tipo'], False, self.fila, self.columna, resultExpresion)
                         resultTabla = newTable.setTabla(simbolo)
                         if isinstance(resultTabla, Excepcion): return resultTabla
                     else:
@@ -61,7 +61,7 @@ class Llamada(Instruccion):
                 if result.parametros[contador]["tipo"] == expresion.tipo:
                     # CREACION DE SIMBOLO E INGRESARLO A LA TABLA DE SIMBOLOS
                     simbolo = Simbolo(str(result.parametros[contador]['identificador']).lower(),
-                    result.parametros[contador]['tipo'], self.fila, self.columna, resultExpresion)
+                    result.parametros[contador]['tipo'], False, self.fila, self.columna, resultExpresion)
                     resultTabla = newTable.setTabla(simbolo)
                     if isinstance(resultTabla, Excepcion): return resultTabla
                 else:

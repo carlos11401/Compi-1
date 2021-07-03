@@ -1,11 +1,12 @@
 
 class Simbolo:
-    def __init__(self, identificador, tipo, fila, columna, valor ):
+    def __init__(self, identificador, tipo, isArray, fila, columna, valor ):
         self.id = identificador
         self.tipo = tipo
         self.fila = fila
         self.columna = columna
         self.valor = valor
+        self.isArray = isArray
 
     def getID(self):
         return self.id
@@ -30,3 +31,6 @@ class Simbolo:
 
     def getColumna(self):
         return self.columna
+
+    def getIsArray(self):
+        return self.isArray

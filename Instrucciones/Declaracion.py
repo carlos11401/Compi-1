@@ -16,12 +16,12 @@ class Declaracion(Instruccion):
         if self.expresion is not None:
             value = self.expresion.interpretar(tree, table)  # Valor a asignar a la variable
             if isinstance(value, Excepcion): return value
-            simbolo = Simbolo(str(self.identificador), self.expresion.tipo, self.fila, self.columna, value)
+            simbolo = Simbolo(str(self.identificador), self.expresion.tipo, False, self.fila, self.columna, value)
 
             result = table.setTabla(simbolo)
             if isinstance(result, Excepcion): return result
         else:
-            simbolo = Simbolo(str(self.identificador), TIPO.NULO, self.fila, self.columna, None)
+            simbolo = Simbolo(str(self.identificador), TIPO.NULO, False, self.fila, self.columna, None)
             result = table.setTabla(simbolo)
             if isinstance(result, Excepcion): return result
         return None

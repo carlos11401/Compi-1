@@ -4,6 +4,7 @@ class Instruccion(ABC):
     def __init__(self, fila, columna):
         self.fila = fila
         self.columna = columna
+        self.isArray = False
         super().__init__()
 
     @abstractmethod
