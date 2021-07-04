@@ -1,0 +1,127 @@
+Carlos Javier Castro Gonzalez 
+201901121
+-------------------- GRAMMAR -------------------------
+init : instrucciones
+instrucciones    : instrucciones instruccion
+				| instruccion
+instruccion : print
+            | decla
+            | asig
+            | incremento
+            | decremento
+            | sentIf
+            | sentWhile
+            | sentBreak
+            | sentFor
+            | sentSwitch
+            | main
+            | func
+            | llam fin
+            | return fin
+            | continue
+            | declaArr fin
+            | modArr fin
+
+print     : RPRINT PARA expresion PARC fin
+decla : RVAR ID fin
+	  | RVAR ID IGUAL expresion fin
+asig : ID IGUAL expresion fin
+incremento : ID MASMAS fin
+decremento : ID MENOSMENOS fin
+
+entIf : RIF PARA expresion PARC LLAVEA instrucciones LLAVEC
+sentIf : RIF PARA expresion PARC LLAVEA instrucciones LLAVEC RELSE LLAVEA instrucciones LLAVEC
+sentIf : RIF PARA expresion PARC LLAVEA instrucciones LLAVEC RELSE sentIf
+
+sentWhile     : RWHILE PARA expresion PARC LLAVEA instrucciones LLAVEC
+
+sentBreak     : RBREAK fin
+
+continue     : RCONTINUE fin
+
+sentFor : RFOR PARA initFor PTCOMA expresion PTCOMA actualizacion PARC LLAVEA instrucciones LLAVEC
+initFor : RVAR ID IGUAL expresion
+		| ID IGUAL expresion
+actualizacion : ID IGUAL expresion
+			  | ID MASMAS
+			  | ID MENOSMENOS
+
+declaArr : tipoArr
+tipoArr : tipo lista_Dim ID IGUAL RNEW tipo lista_expresiones
+tipoArr : tipo lista_Dim ID IGUAL ALL_VAL_ARR
+lista_Dim     : lista_Dim CORA CORC
+lista_Dim    : CORA CORC
+lista_expresiones     : lista_expresiones CORA expresion CORC
+lista_expresiones    : CORA expresion COR
+ALL_VAL_ARR : LLAVEA LIST_VAL_ARR LLAVEC
+LIST_VAL_ARR : LIST_VAL_ARR COMA VAL_ARR
+LIST_VAL_ARR : VAL_ARR
+VAL_ARR : ALL_VAL_ARR
+                | expresion
+
+modArr     :  ID lista_expresiones IGUAL expresion
+
+sentSwitch : RSWITCH PARA expresion PARC LLAVEA cases default LLAVEC
+sentSwitch : RSWITCH PARA expresion PARC LLAVEA cases LLAVEC
+sentSwitch : RSWITCH PARA expresion PARC LLAVEA default LLAVEC
+cases : cases case
+	  | case
+case : RCASE expresion DOSPUNTOS instrucciones
+default : RDEFAULT DOSPUNTOS instrucciones
+
+main     : RMAIN PARA PARC LLAVEA instrucciones LLAVEC
+
+func : RFUNC ID PARA PARC LLAVEA instrucciones LLAVEC
+func     : RFUNC ID PARA params PARC LLAVEA instrucciones LLAVEC
+params : params COMA param
+	   | param
+param : tipo ID
+
+tipo     : RINT
+                | RDOUBLE
+                | RSTRING
+                | RBOOL
+                | RCHAR
+
+return     : RRETURN expresion
+
+llam : ID PARA PARC
+	 | ID PARA params_llam PARC
+params_llam : params_llam COMA param_llam
+	        | param_llam
+			| expresion
+
+expresion : MENOS expresion %prec UMENOS
+            | NOT expresion %prec UNOT
+            | expresion MAS expresion
+            | expresion MENOS expresion
+            | expresion POR expresion
+			| expresion DIV expresion
+			| expresion POT expresion
+			| expresion MOD expresion
+            | expresion MENOR expresion
+			| expresion MAYOR expresion
+			| expresion MENIGUAL expresion
+            | expresion MAYIGUAL expresion
+			| expresion IGUALIGUAL expresion
+            | expresion DIFERENTE expresion
+            | expresion OR expresion
+			| expresion AND expresion
+			| PARA expresion PARC
+			| ENTERO
+			| DECIMAL
+			| CADENA
+			| CHAR
+			| RNULL
+			| RTRUE
+			| RFALSE
+			| ID 
+			| incremento
+			| decremento
+			| llam
+			| RREAD PARA PARC
+			| PARA tipo PARC expresion
+			| ID lista_expresiones
+
+fin : PTCOMA
+    | 

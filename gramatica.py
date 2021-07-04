@@ -532,11 +532,6 @@ def p_fin(t):
         | 
     '''
 
-'''def p_error(t):
-    if t:
-        parser.errok()
-    else:
-        print("Error EOF")'''
 import ply.yacc as yacc
 
 parser = yacc.yacc()
