@@ -23,7 +23,7 @@ tokens = [
              'IGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENIGUAL', 'MAYIGUAL', 'IGUALIGUAL',
              'MAS', 'MENOS', 'MASMAS', 'MENOSMENOS', 'POR', 'DIV', 'MOD', 'POT',
              'PTCOMA', 'DOSPUNTOS', 'COMA', 'COMILLASIMPLE', 'COMILLADOBLE',
-             'DECIMAL', 'ENTERO', 'CADENA', 'BOOL', 'CHAR', 'ID', 'ARRTIPO2',
+             'DECIMAL', 'ENTERO', 'CADENA', 'BOOL', 'CHAR', 'ID',
              'PARA', 'PARC', 'CORA', 'CORC', 'LLAVEA', 'LLAVEC',
              'COMENTARIO', 'COMENTARIOMULTI',
              'OR', 'AND', 'NOT'
@@ -160,6 +160,7 @@ precedence = (
 # Definición de la gramática
 
 # Abstract
+from Instrucciones.DeclaraccionArr2 import DeclaracionArr2
 from Instrucciones.DeclaracionArr1 import DeclaracionArr1
 from Instrucciones.ModificarArr import ModificarArr
 from Instrucciones.Declaracion import Declaracion
@@ -303,7 +304,7 @@ def p_tipo1(t):
     '''tipoArr : tipo lista_Dim ID IGUAL RNEW tipo lista_expresiones'''
     t[0] = DeclaracionArr1(t[1], t[2], t[3], t[6], t[7], t.lineno(3), find_column(input, t.slice[3]))
 def p_tipo2(t):
-    'tipoArr : tipo lista_Dim ID IGUAL ARRTIPO2'
+    'tipoArr : tipo lista_Dim ID IGUAL ALL_VAL_ARR'
     t[0] = DeclaracionArr2(t[1], t[2], t[3], t[5], t.lineno(3), find_column(input, t.slice[3]))
 
 def p_lista_Dim1(t):
@@ -319,7 +320,24 @@ def p_lista_expresiones_1(t):
 def p_lista_expresiones_2(t):
     'lista_expresiones    : CORA expresion CORC'
     t[0] = [t[2]]
+#
+def p_valores_arreglo(t):
+    'ALL_VAL_ARR : LLAVEA LIST_VAL_ARR LLAVEC'
+    t[0]=t[2]
 
+def p_lista_valores_arreglo(t):
+    '''LIST_VAL_ARR : LIST_VAL_ARR COMA VAL_ARR'''
+    t[1].append(t[3])
+    t[0]=t[1]
+
+def p_lista_valores_arreglo2(t):
+    '''LIST_VAL_ARR : VAL_ARR'''
+    t[0]=[t[1]]
+
+def p_valores_arr(t):
+    '''VAL_ARR : ALL_VAL_ARR
+                | expresion'''
+    t[0]=t[1]
 # ------------------------------ MODIFICACION ARREGLOS
 def p_modArr(t) :
     '''modArr     :  ID lista_expresiones IGUAL expresion'''
@@ -561,7 +579,7 @@ def crearNativas(ast):
     ast.addFuncion(toLower)  # Guardar la funcion en memoria
 
     nombre = "length"
-    params = [{'tipo': TIPO.CADENA, 'identificador': '$length_param'}]
+    params = [{'tipo': TIPO.NULO, 'identificador': '$length_param'}]
     instrucciones = []
     length = Length(nombre, params, instrucciones, -1, -1)
     ast.addFuncion(length)  # Guardar la funcion en memoria
@@ -608,8 +626,8 @@ def generateCode(entrada):
             # save functions
             if isinstance(instruccion, Funcion):
                 ast.addFuncion(instruccion)
-            if isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)or isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
-                if isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, Declaracion):
+            if isinstance(instruccion, DeclaracionArr2) or isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)or isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
+                if isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, Declaracion)or isinstance(instruccion, DeclaracionArr2):
                     infTS[instruccion.identificador.lower()+str(TSGlobal)] = ["Global",instruccion.identificador,None,None,None,instruccion.fila,instruccion.columna]
                 value = instruccion.interpretar(ast, TSGlobal)
                 if isinstance(value, Excepcion):
@@ -619,7 +637,6 @@ def generateCode(entrada):
                     err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila, instruccion.columna)
                     ast.getExcepciones().append(err)
                     ast.updateConsola(err.toString())
-
 
         for instruccion in ast.getInstrucciones():  # 2DA PASADA (MAIN)
             contador = 0
@@ -640,7 +657,7 @@ def generateCode(entrada):
                     ast.updateConsola(err.toString())
 
         for instruccion in ast.getInstrucciones():  # 3ERA PASADA (SENTENCIAS FUERA DE MAIN)
-            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion) or isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)):
+            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion) or isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, DeclaracionArr2) or isinstance(instruccion, ModificarArr)):
                 err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
                 ast.getExcepciones().append(err)
                 ast.updateConsola(err.toString())
@@ -670,38 +687,31 @@ def activeDebug(entrada):
         for instruccion in ast.getInstrucciones():  # 3ERA PASADA (SENTENCIAS FUERA DE MAIN)
             if isinstance(instruccion, Funcion):  # save functions
                 ast.addFuncion(instruccion)
-            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion) or isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)):
+            if not (isinstance(instruccion, Main) or isinstance(instruccion, Declaracion) or isinstance(instruccion,Asignacion) or isinstance(instruccion, Funcion) or isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, DeclaracionArr2) or isinstance(instruccion, ModificarArr)):
                 err = Excepcion("Semantico", "Sentencias fuera de Main", instruccion.fila, instruccion.columna)
                 ast.getExcepciones().append(err)
                 ast.updateConsola(err.toString())
 rowDebug = 0
+nuevaTablaMain = ""
 instruccion = ""
+instMain = ""
 main = ""
 def debuggear(entrada):
-    global countDebug, debug, rowDebug, main, instruccion
+    global countDebug, debug, rowDebug, main, instruccion, instMain, nuevaTablaMain, TSGlobal
     if debug:
-        if not isinstance(instruccion, Main):
-            instruccion = instrucciones.pop(0)
-            # 1ERA PASADA (DECLARACIONES Y ASIGNACIONES) --------------
-            if isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)or isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
-
-                value = instruccion.interpretar(ast, TSGlobal)
-                rowDebug = instruccion.fila
-                if isinstance(value, Excepcion):
-                    ast.getExcepciones().append(value)
-                    ast.updateConsola(value.toString())
-                if isinstance(value, Break):
-                    err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila,
-                                    instruccion.columna)
-                    ast.getExcepciones().append(err)
-                    ast.updateConsola(err.toString())
-        if isinstance(instruccion, Main):
+        if isinstance(instMain, Main) and len(instrucciones)==0:
             # 2DA PASADA ---------------------- EJECT MAIN ------------------
-            if len(instruccion.instrucciones) != 0:
-                inst = instruccion.instrucciones.pop(0)
+            if len(instMain.instrucciones) != 0:
+                inst = instMain.instrucciones.pop(0)
                 rowDebug = inst.fila
 
-                value = inst.interpretar(ast, TSGlobal)
+                if isinstance(inst, Declaracion) or isinstance(inst, DeclaracionArr1) or isinstance(inst, DeclaracionArr2):
+                    infTS[inst.identificador.lower() + str(nuevaTablaMain)] = ["Main",
+                                                                                          inst.identificador,
+                                                                                          None, None, None,
+                                                                                          inst.fila,
+                                                                                          inst.columna]
+                value = inst.interpretar(ast, nuevaTablaMain)
                 if isinstance(value, Excepcion):
                     ast.getExcepciones().append(value)
                     ast.updateConsola(value.toString())
@@ -716,6 +726,27 @@ def debuggear(entrada):
                 rowDebug = 0
                 debug = False
                 instruccion = ""
+                instMain = ""
+        else:
+            instruccion = instrucciones.pop(0)
+            # 1ERA PASADA (DECLARACIONES Y ASIGNACIONES) --------------
+            if isinstance(instruccion, DeclaracionArr2) or isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, ModificarArr)or isinstance(instruccion, Declaracion) or isinstance(instruccion, Asignacion):
+                if isinstance(instruccion, DeclaracionArr2) or isinstance(instruccion, DeclaracionArr1) or isinstance(instruccion, Declaracion):
+                    infTS[instruccion.identificador.lower()+str(TSGlobal)] = ["Global",instruccion.identificador,None,None,None,instruccion.fila,instruccion.columna]
+                value = instruccion.interpretar(ast, TSGlobal)
+
+                if isinstance(value, Excepcion):
+                    ast.getExcepciones().append(value)
+                    ast.updateConsola(value.toString())
+                if isinstance(value, Break):
+                    err = Excepcion("Semantico", "Sentencia BREAK fuera de ciclo", instruccion.fila,
+                                    instruccion.columna)
+                    ast.getExcepciones().append(err)
+                    ast.updateConsola(err.toString())
+            if isinstance(instruccion, Main):
+                instMain = instruccion
+                nuevaTablaMain = TablaSimbolos(TSGlobal)
+            rowDebug = instruccion.fila
     return ast.getConsola()
 
 def reportTS():

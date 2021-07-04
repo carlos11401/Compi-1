@@ -37,16 +37,16 @@ class DeclaracionArr1(Instruccion):
         return None
 
     def getNode(self):
-        nodo = NodoAST("DECLARACION ARREGLO")
-        nodo.addChild(str(self.tipo1))
-        nodo.addChild(str(self.dimensiones))
-        nodo.addChild(str(self.identificador))
-        nodo.addChild(str(self.tipo2))
+        node = NodoAST("DECLARACION ARREGLO")
+        node.addChild(str(self.tipo1))
+        node.addChild(str(self.dimensiones))
+        node.addChild(str(self.identificador))
+        node.addChild(str(self.tipo2))
         exp = NodoAST("EXPRESIONES DE LAS DIMENSIONES")
         for expresion in self.expresiones:
-            exp.addNodeChild(expresion.getNodo())
-        nodo.addNodeChild(exp)
-        return nodo
+            exp.addNodeChild(expresion.getNode())
+        node.addNodeChild(exp)
+        return node
 
     def crearDimensiones(self, tree, table, expresiones):
         arr = []

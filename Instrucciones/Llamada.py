@@ -3,8 +3,6 @@ from Abstract.instruccion import Instruccion
 from TS.Exception import Excepcion
 from TS.TablaSimbolos import TablaSimbolos
 from TS.Simbolo import Simbolo
-from TS.Tipo import TIPO
-
 
 class Llamada(Instruccion):
     def __init__(self, nombre, parametros, fila, columna):
@@ -30,6 +28,29 @@ class Llamada(Instruccion):
                                       expresion.tipo, False, self.fila, self.columna, resultExpresion)
                     resultTabla = newTable.setTabla(simbolo)
                     if isinstance(resultTabla, Excepcion): return resultTabla
+                    contador += 1
+            else:
+                return Excepcion("Semantico", "Cantidad de Parametros incorrecta.", self.fila, self.columna)
+        elif result.nombre == "length":
+            if len(self.parametros) == 1:
+                contador = 0
+                for expresion in self.parametros:
+                    resultExpresion = expresion.interpretar(tree, table)
+                    if isinstance(resultExpresion, Excepcion): return resultExpresion
+                    auxSymbol = table.getTabla(expresion.identificador)
+                    if auxSymbol.getIsArray:
+                        # CREACION DE SIMBOLO E INGRESARLO A LA TABLA DE SIMBOLOS
+                        simbolo = Simbolo(str(result.parametros[contador]['identificador']).lower(),
+                                          expresion.tipo, True, self.fila, self.columna, resultExpresion)
+                        resultTabla = newTable.setTabla(simbolo)
+                        if isinstance(resultTabla, Excepcion): return resultTabla
+                        contador += 1
+                    else:
+                        # CREACION DE SIMBOLO E INGRESARLO A LA TABLA DE SIMBOLOS
+                        simbolo = Simbolo(str(result.parametros[contador]['identificador']).lower(),
+                                          expresion.tipo, False, self.fila, self.columna, resultExpresion)
+                        resultTabla = newTable.setTabla(simbolo)
+                        if isinstance(resultTabla, Excepcion): return resultTabla
                     contador += 1
             else:
                 return Excepcion("Semantico", "Cantidad de Parametros incorrecta.", self.fila, self.columna)

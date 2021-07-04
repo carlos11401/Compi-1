@@ -21,6 +21,12 @@ class For(Instruccion):
 
     def interpretar(self, tree, table):
         newTable = TablaSimbolos(table)
+        if isinstance(self.init, Declaracion) or isinstance(self.init, DeclaracionArr1):
+            Grammar.infTS[self.init.identificador.lower() + str(newTable)] = ["For",
+                                                                             self.init.identificador,
+                                                                             None, None, None,
+                                                                             self.init.fila,
+                                                                             self.init.columna]
         var = self.init.interpretar(tree, newTable)
         if isinstance(var, Excepcion): return var
         while True:
